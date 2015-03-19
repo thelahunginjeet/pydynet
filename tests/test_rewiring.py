@@ -64,3 +64,9 @@ class TestRewiring:
         assert accept > 0.0, "SWAP DEGREE: No swaps were performed!"
         for k in net.degree():
             assert net.degree()[k] == deg[k], "SWAP DEGREE: Node degrees should not have changed!"
+
+    def test_graph_perturb(self):
+        net = PulseOscillatorNetwork(10,0.3,'fixed degree')
+        pertNet,R = rewiring.perturb_graph(net)
+        assert R > 0.0, "PERTURB: No graph operations performed!"
+        assert net != pertNet, "PERTURB: Input graph copy failed!"

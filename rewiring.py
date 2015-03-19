@@ -9,7 +9,10 @@ Created by Kevin Brown on 2014-12-04.
 """
 
 import networkx as nx
+from numpy import array,where
+from numpy.random import rand
 from utilities import randchoice
+import copy
 
 
 def add_random_edge(G):
@@ -157,5 +160,62 @@ def swap_random_edges(G):
     G.remove_edges_from([(n1,n2),(n3,n4)])
     G.add_edges_from([(n1,n4),(n2,n3)])
     return True
+
+
+def perturb_graph(G,p=array([0.25,0.25,0.25,0.25]),N=1000):
+    """
+    Performs N random perturbations to an input graph G and returns a new
+    perturbed graph.  
+    
+    Operations are:
+        -add an edge 
+        -remove an edge
+        -move an edge
+        -swap two edges
+
+    INPUT:
+    -------
+    G : networkx graph, required
+        not modified!
+
+    p : array-like, optional (defaults to equal probability for each operation)
+        p[0] = probability of edge addition
+        p[1] = probability of edge removal
+        p[2] = probability of moving an edge
+        p[3] = probability of deleting an edge
+        
+        Clearly, sum(p) = 1.0.  This is enforced by transforming p[i] -> p[i]/sum(p).
+
+    N : integer, optional
+        number of graph perturbations
+
+    OUTPUT:
+    -------
+    Gprime : same type as G
+             this holds the perturbed graph
+
+    R : float
+        acceptance ratio for the perturbations (not all operations will be valid)
+    """
+    # copy input graph; we work on the copy
+    pertG = copy.deepcopy(G)
+    # make sure input p is an array
+    p = array(p)
+    # allowed operations
+    graphOps = [add_random_edge,remove_random_edge,move_random_edge,swap_random_edges]
+    # transform probabilities
+    p = p/p.sum()
+    # keeps track of acceptance ratio
+    R = 0.0
+    for i in xrange(0,N):
+        # choose an operation according to p
+        myop = graphOps[where(rand() < p.cumsum())[0][0]]
+        # in-place mod of pertG with capture of 
+        R += myop(pertG)
+    return pertG,R/N
+        
+
+
+
 
 
