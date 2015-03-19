@@ -221,8 +221,7 @@ class DistanceEmbedding(object):
 
     Methods:
 
-        null map():
-            All distances are equal and have unit magnitude.
+        null map
 
         map_to_unit_circle():
             Equal spacing of the N nodes on a unit circle.
