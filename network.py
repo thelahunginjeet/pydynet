@@ -185,6 +185,7 @@ class PulseOscillatorNetwork(nx.Graph):
         for i in xrange(1,M+1):
             # --- Check threshold ---
             nodesToReset = where(y[:,i-1] > self.y_th)[0]
+            ''' --- old while loop ---
             while len(nodesToReset) > 0:
                 # --- Send pulses to neighbors ---
                 for n in nodesToReset:
@@ -198,6 +199,17 @@ class PulseOscillatorNetwork(nx.Graph):
                 # --- Resolve pulses ---
                 y[:,i-1] += pulses[:,i-1]
                 nodesToReset = where(y[:,i-1] > self.y_th)[0]
+            --- end --- '''
+            for n in nodesToReset:
+                y[n,i-1] = 0
+                for nn in self.neighbors(n):
+                    # here's where we use the distances
+                    delay_ij = self.delta*round(self[n][nn]['length']/dt)
+                    # if a pulse is to be added after T, ignore it (it will never fire)
+                    if i-1+delay_ij < M+1:
+                        pulses[nn,i-1+delay_ij] += self.eps
+            # --- Resolve pulses---
+            y[:,i-1] += pulses[:,i-1]
             # --- Euler step
             y[:,i] = y[:,i-1] + dt*dydt(y[:,i-1],(i-1)*dt,p)
         
