@@ -61,7 +61,7 @@ class PulseOscillatorNetwork(nx.Graph):
         """
         Returns the mean and variance of the node degrees.
         """
-        return mean(self.degree.values()),var(self.degree.values())
+        return mean(self.degree().values()),var(self.degree().values())
 
 
     def length_mean_var(self):
@@ -73,7 +73,7 @@ class PulseOscillatorNetwork(nx.Graph):
         for e1,e2 in self.edges():
             l = self[e1][e2]['length']
             lsum += l
-            l2sum += l2
+            l2sum += l*l
         lmean = lsum/self.number_of_edges()
         return lmean,(l2sum/self.number_of_edges() - lmean*lmean)
 
@@ -221,9 +221,10 @@ class DistanceEmbedding(object):
 
     Methods:
 
-        null map
+        null_map():
+            All distances are equal and of unit magnitude.
 
-        map_to_unit_circle():
+        unitcirc_map():
             Equal spacing of the N nodes on a unit circle.
     
     """
