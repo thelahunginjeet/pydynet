@@ -14,5 +14,5 @@ You should run the tests via distutils:
 
 See the documentation in the modules for detailed usage and function arguments.
 
-Here are a couple of example usages:
+Example usage:
 

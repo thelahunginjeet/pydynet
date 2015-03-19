@@ -15,23 +15,6 @@ from numpy import mean,var
 import networkx as nx
 
 
-# things she needs to compute
-# -remove an edge (rewiring)
-# -add an edge? (rewiring)
-# -move an edge? (rewiring)
-
-# SETUP
-# -Start with a single graph and then perturb it (add/delete/move) to generate a bank of topologies (this may be more of a script?)
-
-# ANALYSIS
-# -compute entropy of phase/period distribution
-
-# Some of these random networks cannot be constructed if d*N is not even (easiest thing is to make N even)
-
-# scripts to provide:
-#   -generate a bunch of topologies with add/delete/move from a single starting graph
-#   -simulate a single random graph
-
 def dydtMS(y,t,p):
     """
     Mirollo-Strogatz linear governing equation for oscillator dynamics.
@@ -238,7 +221,8 @@ class DistanceEmbedding(object):
 
     Methods:
 
-        null map
+        null map():
+            All distances are equal and have unit magnitude.
 
         map_to_unit_circle():
             Equal spacing of the N nodes on a unit circle.
