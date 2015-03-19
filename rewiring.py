@@ -41,6 +41,7 @@ def add_random_edge(G):
     nb = G.neighbors(n1)
     validNodes = [x for x in G.nodes() if x != n1 and x not in nb]
     if len(validNodes) == 0:
+        # selected node is fully connected
         return False
     # second unique node, not already connected to the first node
     n2 = randchoice(validNodes)
@@ -69,7 +70,7 @@ def remove_random_edge(G):
     # choose existing edge at random and unpack tuple
     validEdges = G.edges()
     if len(validEdges) == 0:
-        print 'Graph has no edges to remove!'
+        # graph is empty; no edges to remove
         return False
     e = randchoice(validEdges)
     G.remove_edge(*e)
@@ -99,7 +100,7 @@ def move_random_edge(G):
     # choose a random edge
     validEdges = G.edges()
     if len(validEdges) == 0:
-        print 'Graph has no edges to move!'
+        # graph is empty; no edges to move
         return False
     e = randchoice(validEdges)
     # neighbors of the chosen edge
@@ -135,7 +136,7 @@ def swap_random_edges(G):
     # choose an edge at random
     validEdges = G.edges()
     if len(validEdges) < 2:
-        print 'Graph does not have enough edges to swap!'
+        # there are not two edges to swap
         return False
     n1,n2 = randchoice(validEdges)
     # choose a third node such that
