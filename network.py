@@ -95,7 +95,7 @@ class PulseOscillatorNetwork(nx.Graph):
         self.connect_empty(N,p)
         self.add_edges_from(nx.random_regular_graph(N-1,N).edges())
 
-    
+
     def connect_ring(self,N,p):
         """
         Each of the N nodes is connected to its 'neighbors' (node N to N-1 and N+1, modulo N).
@@ -107,7 +107,7 @@ class PulseOscillatorNetwork(nx.Graph):
             self.add_edge(n,mod(n+1,N))
             self.add_edge(n,mod(n+N-1,N))
 
-    
+
     def connect_fixed_degree(self,N,p):
         """
         All nodes have identical degree; they are each randomly connected to p*N other nodes.
@@ -120,7 +120,7 @@ class PulseOscillatorNetwork(nx.Graph):
 
     def connect_fixed_edges(self,N,p):
         """
-        A fixed fraction of the total possible N*(N-1)/2 connections are made. (Not a binomial 
+        A fixed fraction of the total possible N*(N-1)/2 connections are made. (Not a binomial
         graph!  The number of edges is always p*N(N-1)/2, not just in the N->infinity limit.)
         """
         self.connect_empty(N,p)
@@ -137,22 +137,22 @@ class PulseOscillatorNetwork(nx.Graph):
             self[e1][e2]['length'] = embedding.distances[e1,e2]
         return
 
-    
+
     def euler_integrate(self,dydt,p,y0,T,M=10000,fullout=True):
         """
         Integrates (using the Euler method) a delayed pulse-oscillator network.
-        
+
         INPUT:
             dydt : function (callable), required
-                governing equation for dynamics; should be of the standard form 
-                        
+                governing equation for dynamics; should be of the standard form
+
                         dydt(f,t,p)
 
                 where p are (potentially optional) parameters
 
             p : array, required
                 parameters required for RHS dydt (can be None)
-                
+
             y0 : array, required
                 vector of initial conditions, length equal to number of nodes in network
 
@@ -171,7 +171,7 @@ class PulseOscillatorNetwork(nx.Graph):
                 the final integration time (output == 'final')
 
         OUTPUT:
-            
+
             from [0,T]
         using M total steps.  Returns the final values for the node amplitudes.
         """
@@ -185,21 +185,6 @@ class PulseOscillatorNetwork(nx.Graph):
         for i in xrange(1,M+1):
             # --- Check threshold ---
             nodesToReset = where(y[:,i-1] > self.y_th)[0]
-            ''' --- old while loop ---
-            while len(nodesToReset) > 0:
-                # --- Send pulses to neighbors ---
-                for n in nodesToReset:
-                    y[n,i-1] = 0
-                    for nn in self.neighbors(n):
-                        # here's where we need to use the distances (computing DELAY_ij)
-                        delay_ij = self.delta*round(self[n][nn]['length']/dt)
-                        # if a pulse is to be added after the end of the simulation, ignore it
-                        if i-1+delay_ij < M+1:
-                            pulses[nn,i-1+delay_ij] += self.eps
-                # --- Resolve pulses ---
-                y[:,i-1] += pulses[:,i-1]
-                nodesToReset = where(y[:,i-1] > self.y_th)[0]
-            --- end --- '''
             for n in nodesToReset:
                 y[n,i-1] = 0
                 for nn in self.neighbors(n):
@@ -212,7 +197,7 @@ class PulseOscillatorNetwork(nx.Graph):
             y[:,i-1] += pulses[:,i-1]
             # --- Euler step
             y[:,i] = y[:,i-1] + dt*dydt(y[:,i-1],(i-1)*dt,p)
-        
+
         # integration finished
         if fullout is False:
             # just return y(T), in same shape as y0
@@ -238,7 +223,7 @@ class DistanceEmbedding(object):
 
         unitcirc_map():
             Equal spacing of the N nodes on a unit circle.
-    
+
     """
     def __init__(self,N):
         self.N = N
@@ -258,7 +243,7 @@ class DistanceEmbedding(object):
 
     def unitcirc_map(self):
         """
-        Assign each node to a position on the unit circle, equally spaced.  
+        Assign each node to a position on the unit circle, equally spaced.
         Node 0 is closest to nodes N-1 and 1, 1 closest to 0 and 2, etc.
         """
         dtheta = 2*pi/self.N
@@ -269,5 +254,3 @@ class DistanceEmbedding(object):
                 self.distances[i,j] = sqrt((x[i]-x[j])**2 + (y[i]-y[j])**2)
                 self.distances[j,i] = self.distances[i,j]
         return
-
-
