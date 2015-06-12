@@ -10,7 +10,7 @@ This module controls the construction of a network of oscillators.
 from __future__ import division
 from utilities import randchoice
 from numpy import zeros,ones,arange,empty_like,where,reshape
-from numpy import sqrt,cos,sin,pi,mod,round
+from numpy import sqrt,cos,sin,pi,mod,round,all
 from numpy import mean,var
 import networkx as nx
 
@@ -138,7 +138,7 @@ class PulseOscillatorNetwork(nx.Graph):
         return
 
 
-    def euler_integrate(self,dydt,p,y0,T,M=10000,fullout=True):
+    def euler_integrate(self,dydt,p,y0,T,M=10000,fullout=True,stopatsync=False):
         """
         Integrates (using the Euler method) a delayed pulse-oscillator network.
 
@@ -165,6 +165,11 @@ class PulseOscillatorNetwork(nx.Graph):
             fullout : boolean, optional
                     if fullout == True, an array of size nNodes x M will be returned, giving
                     y(t) at all M simulation steps.  Set to False to return only y(T).
+
+            stopatsync : boolean, optional
+                    if stopatsync == True, the integration will terminate as soon as all
+                    the nodes are synchronized (i.e., all reset in the same step before
+                    pulses are resolved)
 
         OUTPUT:
             y : amplitudes for each node at all simulation times (output == 'full') or just
@@ -193,8 +198,17 @@ class PulseOscillatorNetwork(nx.Graph):
                     # if a pulse is to be added after T, ignore it (it will never fire)
                     if i-1+delay_ij < M+1:
                         pulses[nn,i-1+delay_ij] += self.eps
+
+            # --- Check for synchronization ---
+            if np.all(y[:,i-1] < 1.0e-10) and stopatsync:
+                if fullout is False:
+                    return reshape(y[:,-1],y0.shape)
+                else:
+                    return y
+
             # --- Resolve pulses---
             y[:,i-1] += pulses[:,i-1]
+
             # --- Euler step
             y[:,i] = y[:,i-1] + dt*dydt(y[:,i-1],(i-1)*dt,p)
 
