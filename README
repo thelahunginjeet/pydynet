@@ -16,3 +16,20 @@ See the documentation in the modules for detailed usage and function arguments.
 
 Example usage:
 
+# create a network
+net = PulseOscillatorNetwork(10,topology='ring')
+# create a distance embedding
+embed = DistanceEmbedding(len(self.net.nodes()))
+# fix the distance matrix
+embed.unitcirc_map()
+# connect the graph topology with the distance matrix
+net.set_edge_lengths(embed)
+# set the delay and pulse parameters
+net.eps = 0.1
+net.delta = 1.0
+# parameters for the EOMs
+p = np.array([1,2])
+# IC
+y0 = np.zeros((len(net.nodes()),1))
+# Integrate
+y = net.euler_integrate(dydtMS,p,y0,100,M=10000,fullout=False)

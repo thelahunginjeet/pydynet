@@ -66,6 +66,7 @@ def remove_random_edge(G):
     -Conservative in nodes, nonconservative in edges.
     -Changes degree distribution.
     -Fails for a graph with zero edges.
+    -Fails if it disconnects the graph
     """
     # choose existing edge at random and unpack tuple
     validEdges = G.edges()
@@ -74,7 +75,9 @@ def remove_random_edge(G):
         return False
     e = randchoice(validEdges)
     G.remove_edge(*e)
-    return True
+    if nx.algorithms.is_connected(G):
+        return True
+    return False
 
 
 def move_random_edge(G):
@@ -112,7 +115,9 @@ def move_random_edge(G):
     n3 = randchoice(validNodes)
     G.remove_edge(*e)
     G.add_edge(e[0],n3)
-    return True
+    if nx.algorithms.is_connected(G):
+        return True
+    return False
 
 
 def swap_random_edges(G):
@@ -166,10 +171,10 @@ def swap_random_edges(G):
 def perturb_graph(G,p=array([0.25,0.25,0.25,0.25]),N=1000):
     """
     Performs N random perturbations to an input graph G and returns a new
-    perturbed graph.  
-    
+    perturbed graph.
+
     Operations are:
-        -add an edge 
+        -add an edge
         -remove an edge
         -move an edge
         -swap two edges
@@ -184,7 +189,7 @@ def perturb_graph(G,p=array([0.25,0.25,0.25,0.25]),N=1000):
         p[1] = probability of edge removal
         p[2] = probability of moving an edge
         p[3] = probability of deleting an edge
-        
+
         Clearly, sum(p) = 1.0.  This is enforced by transforming p[i] -> p[i]/sum(p).
 
     N : integer, optional
@@ -211,12 +216,6 @@ def perturb_graph(G,p=array([0.25,0.25,0.25,0.25]),N=1000):
     for i in xrange(0,N):
         # choose an operation according to p
         myop = graphOps[where(rand() < p.cumsum())[0][0]]
-        # in-place mod of pertG with capture of 
+        # in-place mod of pertG with capture of acceptance flag
         R += myop(pertG)
     return pertG,R/N
-        
-
-
-
-
-
