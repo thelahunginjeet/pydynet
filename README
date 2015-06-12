@@ -2,7 +2,7 @@ Author : Kevin S. Brown (kevin.s.brown@uconn.edu, github.com/thelahunginjeet), A
 
 A python package for construction and simulation of dynamical networks, including embedding in physical space (i.e., making
 the edge weights correspond to some kind of physical distance).  Current support is only for pulse-coupled oscillators.
-This package relies heavily on the networkx python package for graph representation and manipultion.
+This package relies heavily on the networkx python package for graph representation and manipulation.
 
 All source code is made available under the BSD-3 license.
 
