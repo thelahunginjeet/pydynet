@@ -200,7 +200,7 @@ class PulseOscillatorNetwork(nx.Graph):
                         pulses[nn,i-1+delay_ij] += self.eps
 
             # --- Check for synchronization ---
-            if np.all(y[:,i-1] < 1.0e-10) and stopatsync:
+            if all(y[:,i-1] < 1.0e-10) and stopatsync:
                 if fullout is False:
                     return reshape(y[:,-1],y0.shape)
                 else:
