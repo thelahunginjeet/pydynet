@@ -119,6 +119,13 @@ def move_random_edge(G):
         return True
     return False
 
+def move_random_edge_cons(G):
+    """
+    Moves a random edge conservatively; meaning, individual node degrees are not
+    preserved, but degree distribution is.
+    """
+    return False
+
 
 def swap_random_edges(G):
     """
