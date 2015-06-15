@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# encoding: utf-8:w
 from numpy.random import randint
 
 def randchoice(l):
