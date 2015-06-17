@@ -106,7 +106,7 @@ def move_random_edge(G):
         # graph is empty; no edges to move
         return False
     e = randchoice(validEdges)
-    # neighbors of the chosen edge
+    # neighbors of first node in the chosen edge
     nb = G.neighbors(e[0])
     # additional node that is neither n1 or connected to n1
     validNodes = [x for x in G.nodes() if x != e[0] and x not in nb]
@@ -123,8 +123,46 @@ def move_random_edge_cons(G):
     """
     Moves a random edge conservatively; meaning, individual node degrees are not
     preserved, but degree distribution is.
+
+    INPUT:
+    -------
+    G : networkx graph, required
+        changed in-place!
+
+    OUTPUT:
+    -------
+    flag : boolean
+        indicates if the move was successful or not
+
+    -Conservative in nodes and edges.
+    -Conserves degree distribution.
+    -Changes the individual node degrees.
     """
-    return True
+    # node degrees
+    deg = G.degree()
+    # minimum and maximum degree (these nodes cannot be involved in the move)
+    minDeg,maxDeg = min(deg.values()),max(deg.values())
+    # choose a random edge
+    validEdges = G.edges()
+    if len(validEdges) == 0:
+        # graph is empty; no edges to move
+        return False
+    e = randchoice(validEdges)
+    # second node in the edge cannot have the minimum degree
+    if G.degree(e[1]) == minDeg:
+        return False
+    # additional node that is not n1 or connected to n1 and does not have
+    # degree equal to the maximum degree
+    nb = G.neighbors(e[0])
+    validNodes = [x for x in G.nodes() if x != e[0] and x not in nb and G.degree(x) != maxDeg]
+    if len(validNodes) == 0:
+        return False
+    n3 = randchoice(validNodes)
+    G.remove_edge(*e)
+    G.add_edge(e[0],n3)
+    if nx.algorithms.is_connected(G):
+        return True
+    return False
 
 
 def swap_random_edges(G):
