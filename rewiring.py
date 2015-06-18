@@ -33,7 +33,7 @@ def add_random_edge(G):
 
     -Conservative in nodes, nonconservative in edges.
     -Changes degree distribution.
-    -Fails if the first node selected is fully connected.
+    -Fails if the target node selected is fully connected.
     """
     # pick a random node
     n1 = randchoice(G.nodes())
@@ -66,7 +66,7 @@ def remove_random_edge(G):
     -Conservative in nodes, nonconservative in edges.
     -Changes degree distribution.
     -Fails for a graph with zero edges.
-    -Fails if it disconnects the graph
+    -Fails if it disconnects the graph.
     """
     # choose existing edge at random and unpack tuple
     validEdges = G.edges()
@@ -77,7 +77,10 @@ def remove_random_edge(G):
     G.remove_edge(*e)
     if nx.algorithms.is_connected(G):
         return True
-    return False
+    else:
+        # if this disconnects the graph, re-add the edge and fail the move
+        G.add_edge(*e)
+        return False
 
 
 def move_random_edge(G):
@@ -98,7 +101,9 @@ def move_random_edge(G):
 
     -Conservative in nodes and edges.
     -Changes degree distribution.
-    -Fails if the first node selected is fully connected or for a graph with no edges.
+    -Fails if the graph has no edges.
+    -Fails if the first node selected is fully connected.
+    -Fails if it disconnects the graph.
     """
     # choose a random edge
     validEdges = G.edges()
@@ -117,7 +122,12 @@ def move_random_edge(G):
     G.add_edge(e[0],n3)
     if nx.algorithms.is_connected(G):
         return True
-    return False
+    else:
+        # if this disconnects the graph, undo the move and fail
+        G.remove_edge(e[0],n3)
+        G.add_edge(*e)
+        return False
+
 
 def move_random_edge_cons(G):
     """
@@ -137,6 +147,10 @@ def move_random_edge_cons(G):
     -Conservative in nodes and edges.
     -Conserves degree distribution.
     -Changes the individual node degrees.
+    -Fails if the graph is empty.
+    -Fails if the node to disconnect has degree == network minimum.
+    -Falis if the target node has degree == network maximum.
+    -Fails if the move disconnects the graph.
     """
     # node degrees
     deg = G.degree()
@@ -162,7 +176,11 @@ def move_random_edge_cons(G):
     G.add_edge(e[0],n3)
     if nx.algorithms.is_connected(G):
         return True
-    return False
+    else:
+        # undo the move if it has disconnected the graph
+        G.remove_edge(e[0],n3)
+        G.add_edge(*e)
+        return False
 
 
 def swap_random_edges(G):
@@ -181,7 +199,9 @@ def swap_random_edges(G):
         indicates if the swap was successful or not
 
     -Conservative in nodes and edges.
-    -Does not change degree distribution. (Does not even change individual node degrees.)
+    -Does not change degree distribution.
+    -Does not change individual node degrees.
+    -Fails based on various node conditions in picking n1,...,n4.
     """
     # choose an edge at random
     validEdges = G.edges()
@@ -213,7 +233,7 @@ def swap_random_edges(G):
     return True
 
 
-def perturb_graph(G,p=array([0.25,0.25,0.25,0.25]),N=1000):
+def perturb_graph(G,p=array([0.2,0.2,0.2,0.2,0.2]),N=1000):
     """
     Performs N random perturbations to an input graph G and returns a new
     perturbed graph.
@@ -222,6 +242,7 @@ def perturb_graph(G,p=array([0.25,0.25,0.25,0.25]),N=1000):
         -add an edge
         -remove an edge
         -move an edge
+        -move an edge conservatively
         -swap two edges
 
     INPUT:
@@ -233,9 +254,10 @@ def perturb_graph(G,p=array([0.25,0.25,0.25,0.25]),N=1000):
         p[0] = probability of edge addition
         p[1] = probability of edge removal
         p[2] = probability of moving an edge
-        p[3] = probability of deleting an edge
+        p[3] = probability of moving an edge conservatively
+        p[4] = probability of deleting an edge
 
-        Clearly, sum(p) = 1.0.  This is enforced by transforming p[i] -> p[i]/sum(p).
+        Clearly, sum(p) = 1.0.  This is ensured by transforming p[i] -> p[i]/sum(p).
 
     N : integer, optional
         number of graph perturbations
