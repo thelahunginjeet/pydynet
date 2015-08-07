@@ -19,7 +19,7 @@ Example usage:
 # create a network
 net = PulseOscillatorNetwork(10,topology='ring')
 # create a distance embedding
-embed = DistanceEmbedding(len(self.net.nodes()))
+embed = DistanceEmbedding(len(net.nodes()))
 # fix the distance matrix
 embed.unitcirc_map()
 # connect the graph topology with the distance matrix
