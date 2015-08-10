@@ -8,7 +8,7 @@ All source code is made available under the BSD-3 license.
 
 You should run the tests via distutils:
 
->python setup.py test
+>>python setup.py test
 
 (These will certainly fail without networkx installation.  Otherwise they should be fine.)
 
@@ -16,20 +16,14 @@ See the documentation in the modules for detailed usage and function arguments.
 
 Example usage:
 
-# create a network
-net = PulseOscillatorNetwork(10,topology='ring')
-# create a distance embedding
-embed = DistanceEmbedding(len(net.nodes()))
-# fix the distance matrix
+from pydynet import network
+import numpy as np
+net = network.PulseOscillatorNetwork(10,topology='ring')
+embed = network.DistanceEmbedding(len(net.nodes()))
 embed.unitcirc_map()
-# connect the graph topology with the distance matrix
 net.set_edge_lengths(embed)
-# set the delay and pulse parameters
 net.eps = 0.1
 net.delta = 1.0
-# parameters for the EOMs
 p = np.array([1,2])
-# IC
-y0 = np.zeros((len(net.nodes()),1))
-# Integrate
-y = net.euler_integrate(dydtMS,p,y0,100,M=10000,fullout=False)
+y0 = [0.1,0.1,0.2,0.2,0.3,0.3,0.4,0.4,0.5,0.5]
+y = net.euler_integrate(p,y0,100,M=10000,fullout=False,stopatsync=False)
