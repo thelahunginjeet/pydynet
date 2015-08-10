@@ -9,10 +9,12 @@ This module controls the construction of a network of oscillators.
 
 from __future__ import division
 from utilities import randchoice
-from numpy import zeros,ones,arange,empty_like,where,reshape
+from numpy import zeros,ones,arange,empty_like,where,reshape,asarray
 from numpy import sqrt,cos,sin,pi,mod,round,all
 from numpy import mean,var
+from numpy import uint8,float64,int
 import networkx as nx
+import eulerint
 
 
 def dydtMS(y,t,p):
@@ -138,20 +140,14 @@ class PulseOscillatorNetwork(nx.Graph):
         return
 
 
-    def euler_integrate(self,dydt,p,y0,T,M=10000,fullout=True,stopatsync=False):
+    def euler_integrate(self,p,y0,T,M=10000,fullout=True,stopatsync=False):
         """
         Integrates (using the Euler method) a delayed pulse-oscillator network.
+        Currently, only one kind of RHS (Mirollo-Strogatz) is supported.
 
         INPUT:
-            dydt : function (callable), required
-                governing equation for dynamics; should be of the standard form
-
-                        dydt(f,t,p)
-
-                where p are (potentially optional) parameters
-
             p : array, required
-                parameters required for RHS dydt (can be None)
+                parameters required for RHS dydt (cannot be none!)
 
             y0 : array, required
                 vector of initial conditions, length equal to number of nodes in network
@@ -180,6 +176,33 @@ class PulseOscillatorNetwork(nx.Graph):
             from [0,T]
         using M total steps.  Returns the final values for the node amplitudes.
         """
+        # lots of massaging to:
+        #   1. maintain type consistency with the cython/C call
+        #   2. avoid passing too many python objects/functions into the C call
+        # booleans to uint8
+        fo = uint8(0)
+        if fullout is True:
+            fo = uint8(1)
+        sos = uint8(0)
+        if stopatsync is True:
+            sos = uint8(1)
+        # make sure parameters are floats
+        p = p.astype(float64)
+        # type and shape of y0
+        y0 = asarray(y0).reshape((len(self.nodes()),1)).astype(float64)
+        # things to try to avoid lots of python object access
+        yth = float64(self.y_th)
+        delta = float64(self.delta)
+        eps = float64(self.eps)
+        lengthAdj = zeros((len(self.nodes()),len(self.nodes())),dtype=float64)
+        for i in xrange(len(self.nodes())):
+            nlist = self.neighbors(i)
+            for n in nlist:
+                lengthAdj[i,n] = self[i][n]['length']
+        # make the call to the integrator
+        y = eulerint.euler_integrate(lengthAdj,p,y0,yth,delta,eps,T,M,fo,sos)
+        return y
+'''
         # sets up storage for y, pulses, and sets the ICs
         y = zeros((len(self.nodes()),M+1))
         pulses = zeros((len(self.nodes()),M+1))
@@ -218,7 +241,7 @@ class PulseOscillatorNetwork(nx.Graph):
             return reshape(y[:,-1],y0.shape)
         # return solution at all nodes, all timesteps
         return y
-
+'''
 
 
 
