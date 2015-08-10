@@ -1,6 +1,18 @@
 #!/usr/bin/env python
 
 from distutils.core import setup,Command
+from numpy.distutils.misc_util import get_numpy_include_dirs
+from distutils.extension import Extension
+import os
+
+# you can customize
+#os.environ["CC"] = "clang"
+#os.environ["CXX"] = "clang"
+
+# cython extension for the euler integration
+eulerint = Extension("eulerint",
+                    include_dirs = get_numpy_include_dirs(),
+                    sources = ["eulerint.c"])
 
 class PyTest(Command):
     user_options = []
@@ -22,6 +34,8 @@ setup(name='pydynet',
       packages=['pydynet'],
       package_dir = {'pydynet': ''},
       package_data = {'pydynet' : ['tests/*.py']},
+      ext_package = 'pydynet',
+      ext_modules = [eulerint],
       cmdclass = {'test': PyTest},
       license='BSD-3',
       classifiers=[
