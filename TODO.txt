@@ -1,10 +1,6 @@
 TODO:
 -allow non-uniform amplitude exchanges, instead of always magnitude eps
--better support for returning y(t) at intermediate granularity
--oscillators should store their own state variable (as node datae
 -better integrators that handle threshold crossings
 -more complicated reporting scheme for graph perturbations (report error code/reason for failure?)
-
-QUESTIONS:
--don't store distances in a matrix?  This will be bad for very large graphs . . .
--why the min(i+dtau+1,Tf) thing?  If the pulse is going to be added after the end of the simulation, shouldn't you just ignore it?
+-fix tests to run with extension modules
+-get dependencies (i.e. networkx) into the setup file
