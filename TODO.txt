@@ -4,3 +4,4 @@ TODO:
 -more complicated reporting scheme for graph perturbations (report error code/reason for failure?)
 -fix tests to run with extension modules
 -get dependencies (i.e. networkx) into the setup file
+-add quadratic integrate-and-fire model to possible dynamics
