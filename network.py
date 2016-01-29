@@ -37,7 +37,7 @@ class PulseOscillatorNetwork(nx.Graph):
         super(PulseOscillatorNetwork,self).__init__()
         # dispatch on topology type
         tdict = {'empty':self.connect_empty, 'full':self.connect_full, 'ring':self.connect_ring, 'fixed degree':self.connect_fixed_degree,
-                 'fixed edges':self.connect_fixed_edges}
+                 'fixed edges':self.connect_fixed_edges,'ER':self.connect_erdos_renyi}
         tdict[topology](N,p)
         # set default amplitude/delay/threshold parameters for dynamical simulations
         self.eps = 0.3
@@ -128,6 +128,15 @@ class PulseOscillatorNetwork(nx.Graph):
         self.connect_empty(N,p)
         dN = int(p*N*(N-1)/2)
         self.add_edges_from(nx.gnm_random_graph(N,dN).edges())
+
+
+    def connect_erdos_renyi(self,N,p):
+        """
+        Erdos-Renyi (Poisson random) graph G(N,p).
+        """
+        # this is kind of a dumb way to do this
+        self.connect_empty(N,p)
+        self.add_edges_from(nx.gnp_random_graph(N,p).edges())
 
 
     def set_edge_lengths(self,embedding):
