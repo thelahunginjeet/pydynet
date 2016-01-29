@@ -7,7 +7,8 @@ analysis.py
 
 Created by Kevin Brown on 2015-03-17.
 """
-from numpy import log,histogram,nonzero,delete,zeros_like,array,exp,mean,abs
+from numpy import log,exp,mean,abs
+from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros
 
 def phi_of_t(y,group=None):
     '''
@@ -41,7 +42,7 @@ def phi_of_t(y,group=None):
     return abs(phi)
 
 
-def convert_to_spikes(y,sorting='upper',thresh=1.0):
+def convert_to_spikes(y,sorting='lower',thresh=1.0e-06):
     '''
     Accepts an input array y (N x t), representing amplitude or something
     similar, and returns an array of 1's and 0's of the same size giving
@@ -75,6 +76,35 @@ def convert_to_spikes(y,sorting='upper',thresh=1.0):
     else:
         s[y <= thresh] = 1
     return s
+
+
+def isi_stats(spike_array):
+    '''
+    Accepts an N x t input array of 1's and 0's, with a 1 indicating a spike
+    occurred in that time bin and returns the mean and variance of the interspike
+    intervals.
+
+    INPUT:
+        spike_array : array, required
+            spike_array should only contain 1's and 0's; amplitude/phase arrays
+            should be pre-converted via convert_to_spikes
+
+    OUTPUT:
+        isi_mean : array (N elements)
+            ISI mean
+
+        isi_var : array (N elements)
+            ISI variance
+    '''
+    N = spike_array.shape[0]
+    isi_mean = zeros(N)
+    isi_var = zeros(N)
+    for k in xrange(0,N):
+        spike_loc = where(spike_array[k,:] == 1)[0]
+        isi_array = spike_loc - roll(spike_loc,1)
+        isi_mean[k] = isi_array[1:].mean()
+        isi_var[k] = isi_array[1:].var()
+    return isi_mean,isi_var
 
 
 def entropy(x,bins=10,est='ML'):
