@@ -83,7 +83,7 @@ class PulseOscillatorNetwork(nx.Graph):
     def connect_empty(self,N,p):
         """
         Adds N nodes to the graph, but no edges.  This can be used to clear the graph without deleting
-        the object.
+        the object.  p is unused here.
         """
         self.remove_nodes_from(self.nodes())
         # re-add desired number of nodes
@@ -138,6 +138,26 @@ class PulseOscillatorNetwork(nx.Graph):
         self.connect_empty(N,p)
         self.add_edges_from(nx.gnp_random_graph(N,p).edges())
 
+
+    def connect_barbasi_albert(self,N,m):
+        """
+        Barabasi-Albert preferential attachment graph with N nodes and m edges.
+        """
+        # again, not the best way to do this
+        self.connect_empty(N,p)
+        self.add_edges_from(nx.barbasi_albert_graph(N,m).edges())
+
+
+    def connect_watts_strogatz(self,N,p):
+        """
+        Newman-Watts-Strogatz graph staring with a ring.  Each node is wired to
+        its nearest neighbors on the ring and then additional edges are added
+        with probability p.
+        """
+        # ditto
+        self.connect_empty(N,p)
+        self.add_edges_from(nx.newman_watts_strogatz_graph(N,2,p).edges())
+        
 
     def set_edge_lengths(self,embedding):
         """
