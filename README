@@ -18,7 +18,12 @@ Example usage:
 
 from pydynet import network
 import numpy as np
-net = network.PulseOscillatorNetwork(10,topology='ring')
+# ring requires only one parameter
+net = network.PulseOscillatorNetwork(10,'ring')
+# some networks require a [0,1] parameter
+net = network.PulseOscillatorNetwork(10,'ER',0.2)
+# sometimes the third parameter needs to be an integer
+net = network.PulseOscillatorNetwork(10,'BA',3)
 embed = network.DistanceEmbedding(len(net.nodes()))
 embed.unitcirc_map()
 net.set_edge_lengths(embed)

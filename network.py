@@ -33,12 +33,17 @@ def dydtMS(y,t,p):
 
 class PulseOscillatorNetwork(nx.Graph):
 
-    def __init__(self,N,p=0.5,topology='empty'):
+    def __init__(self,N,topology,*args):
         super(PulseOscillatorNetwork,self).__init__()
         # dispatch on topology type
         tdict = {'empty':self.connect_empty, 'full':self.connect_full, 'ring':self.connect_ring, 'fixed degree':self.connect_fixed_degree,
-                 'fixed edges':self.connect_fixed_edges,'ER':self.connect_erdos_renyi}
-        tdict[topology](N,p)
+                 'fixed edges':self.connect_fixed_edges,'ER':self.connect_erdos_renyi, 'WS':self.connect_watts_strogatz,
+                 'BA':self.connect_barabasi_albert}
+        if tdict.has_key(topology):
+            tdict[topology](N,*args)
+        else:
+            print 'ERROR.  Unrecognized graph topology. Defaulting to ring.'
+            self.connect_ring(N)
         # set default amplitude/delay/threshold parameters for dynamical simulations
         self.eps = 0.3
         self.delta = 0
@@ -80,10 +85,10 @@ class PulseOscillatorNetwork(nx.Graph):
         return lmean,(l2sum/self.number_of_edges() - lmean*lmean)
 
 
-    def connect_empty(self,N,p):
+    def connect_empty(self,N):
         """
         Adds N nodes to the graph, but no edges.  This can be used to clear the graph without deleting
-        the object.  p is unused here.
+        the object.
         """
         self.remove_nodes_from(self.nodes())
         # re-add desired number of nodes
@@ -94,17 +99,17 @@ class PulseOscillatorNetwork(nx.Graph):
         """
         Each node is connected to every other node; all N nodes have degree N-1.
         """
-        self.connect_empty(N,p)
+        self.connect_empty(N)
         self.add_edges_from(nx.random_regular_graph(N-1,N).edges())
 
 
-    def connect_ring(self,N,p):
+    def connect_ring(self,N):
         """
         Each of the N nodes is connected to its 'neighbors' (node N to N-1 and N+1, modulo N).
         The neighbors are only meaningful once a distance embedding is chosen; if the unit circle
         mapping is chosen, this topolgy gives a ring with nearest neighbor connections.
         """
-        self.connect_empty(N,p)
+        self.connect_empty(N)
         for n in self.nodes():
             self.add_edge(n,mod(n+1,N))
             self.add_edge(n,mod(n+N-1,N))
@@ -115,7 +120,7 @@ class PulseOscillatorNetwork(nx.Graph):
         All nodes have identical degree; they are each randomly connected to p*N other nodes.
         If p > 1 - 1/N, this will return the regular, fully connected graph.'
         """
-        self.connect_empty(N,p)
+        self.connect_empty(N)
         d = int(p*N)
         self.add_edges_from(nx.random_regular_graph(d,N).edges())
 
@@ -125,7 +130,7 @@ class PulseOscillatorNetwork(nx.Graph):
         A fixed fraction of the total possible N*(N-1)/2 connections are made. (Not a binomial
         graph!  The number of edges is always p*N(N-1)/2, not just in the N->infinity limit.)
         """
-        self.connect_empty(N,p)
+        self.connect_empty(N)
         dN = int(p*N*(N-1)/2)
         self.add_edges_from(nx.gnm_random_graph(N,dN).edges())
 
@@ -135,17 +140,20 @@ class PulseOscillatorNetwork(nx.Graph):
         Erdos-Renyi (Poisson random) graph G(N,p).
         """
         # this is kind of a dumb way to do this
-        self.connect_empty(N,p)
+        self.connect_empty(N)
         self.add_edges_from(nx.gnp_random_graph(N,p).edges())
 
 
-    def connect_barbasi_albert(self,N,m):
+    def connect_barabasi_albert(self,N,m):
         """
-        Barabasi-Albert preferential attachment graph with N nodes and m edges.
+        Barabasi-Albert preferential attachment graph with N nodes and m
+        edges from each new node to existing nodes.
         """
+        if m > N:
+            m = N-1
         # again, not the best way to do this
-        self.connect_empty(N,p)
-        self.add_edges_from(nx.barbasi_albert_graph(N,m).edges())
+        self.connect_empty(N)
+        self.add_edges_from(nx.barabasi_albert_graph(N,m).edges())
 
 
     def connect_watts_strogatz(self,N,p):
@@ -155,9 +163,9 @@ class PulseOscillatorNetwork(nx.Graph):
         with probability p.
         """
         # ditto
-        self.connect_empty(N,p)
+        self.connect_empty(N)
         self.add_edges_from(nx.newman_watts_strogatz_graph(N,2,p).edges())
-        
+
 
     def set_edge_lengths(self,embedding):
         """
