@@ -7,7 +7,7 @@ analysis.py
 
 Created by Kevin Brown on 2015-03-17.
 """
-from numpy import log,exp,mean,abs
+from numpy import log,exp,mean,abs,log2
 from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros
 
 def phi_of_t(y,group=None):
@@ -150,3 +150,65 @@ def entropy(x,bins=10,est='ML'):
         H = H_JK
 
     return H
+
+
+def random_lz_complexity(n,p=0.5):
+    '''
+    Computes the expected Lev-Zimpel complexity for a random sequence of length
+    n and expected probability of generating a 1 = p.  Useful for normalizing
+    the raw lz_complexity.  This function will behave poorly if p is identically
+    0 or 1.  Therefore, it would be best to estimate p from real (finite length)
+    strings using pseudocounts.
+
+    INPUT:
+        n : int, required
+          length of the random sequence
+
+        p : float, optional
+          probability of seeing a 1 in the sequence
+    '''
+    # source entropy
+    h = -p*log2(p) - (1-p)*log2(1-p)
+    # expected LZ complexity of binary representations of real numbers
+    bn = n/log2(n)
+    return h*bn
+
+
+
+def lz_complexity(s):
+    '''
+    Lev-Zimpel complexity as described in Kaspar and Schuster, Phys. Rev. A.
+    The input iterable (see below) does not have to be binary (2-element), but
+    most applications of LZ complexity have used strings of 0s and 1s.
+
+    INPUT:
+        s : string, list, or tuple, required
+          sequence to calculate complexity for
+
+    '''
+    i, k, l = 0, 1, 1
+    k_max = 1
+    n = len(s)-1
+    lzc = 1
+    while True:
+        if s[i+k-1] == s[l+k-1]:
+            k += 1
+            if l + k >= n - 1:
+                lzc += 1
+                break
+        else:
+            if k > k_max:
+               k_max = k
+            i += 1
+            if i == l:
+                lzc += 1
+                l += k_max
+                if l + 1 > n:
+                    break
+                else:
+                    i = 0
+                    k = 1
+                    k_max = 1
+            else:
+                k = 1
+    return lzc
