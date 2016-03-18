@@ -27,6 +27,8 @@ net = network.PulseOscillatorNetwork(10,'BA',3)
 embed = network.DistanceEmbedding(len(net.nodes()))
 embed.unitcirc_map()
 net.set_edge_lengths(embed)
+# if you want to change default delays and eps, do so here
+#   default is delta = 0, eps = 1/(Nnodes - 1)
 net.eps = 0.1
 net.delta = 1.0
 p = np.array([1,2])
