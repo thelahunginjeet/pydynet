@@ -68,9 +68,9 @@ def convert_to_spikes(y,sorting='lower',thresh=1.0e-06):
     OUTPUT:
         s : array-like
             N x t array of 1's and 0's, with 'interesting' times in y having
-            the value 1.0
+            the value 1
     '''
-    s = zeros_like(y)
+    s = zeros_like(y,dtype=int)
     if sorting is 'upper':
         s[y >= thresh] = 1
     else:
@@ -212,3 +212,20 @@ def lz_complexity(s):
             else:
                 k = 1
     return lzc
+
+def complexity(spike_array,method='lz_norm'):
+    '''
+    Complexity measure for each node's spiking pattern.  Could dispatch to a
+    variety of measures.  Returns an array of length equal to spike_array.shape[0].
+    '''
+    N,T = spike_array.shape
+    c = zeros(N)
+    if method == 'lz_norm':
+        for i in xrange(0,N):
+            # determine probability of generating a 1
+            p = (sum(spike_array[i,:]) + 1.0)/(T + 2.0)
+            # convert the list of spikes to a string
+            s = ''.join(spike_array[i,:])
+            # compute normalized LZ complexity
+            c = 1.0*lz_complexity(s)/random_lz_complexity(T,p)
+    return c
