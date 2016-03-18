@@ -45,7 +45,7 @@ class PulseOscillatorNetwork(nx.Graph):
             print 'ERROR.  Unrecognized graph topology. Defaulting to ring.'
             self.connect_ring(N)
         # set default amplitude/delay/threshold parameters for dynamical simulations
-        self.eps = 0.3
+        self.eps = 1.0/(N-1)
         self.delta = 0
         self.y_th = 1.0
 
@@ -239,48 +239,6 @@ class PulseOscillatorNetwork(nx.Graph):
         # make the call to the integrator
         y = eulerint.euler_integrate(lengthAdj,p,y0,yth,delta,eps,T,M,fo,sos)
         return y
-'''
-        # sets up storage for y, pulses, and sets the ICs
-        y = zeros((len(self.nodes()),M+1))
-        pulses = zeros((len(self.nodes()),M+1))
-        y[:,0] = y0.flatten()
-        # size of timestep
-        dt = T/M
-        # start stepping (M+1 ensures we store 0,dt,2*dt,...,M*dt=T)
-        for i in xrange(1,M+1):
-            # --- Check threshold ---
-            nodesToReset = where(y[:,i-1] > self.y_th)[0]
-            for n in nodesToReset:
-                y[n,i-1] = 0
-                for nn in self.neighbors(n):
-                    # here's where we use the distances
-                    delay_ij = self.delta*round(self[n][nn]['length']/dt)
-                    # if a pulse is to be added after T, ignore it (it will never fire)
-                    if i-1+delay_ij < M+1:
-                        pulses[nn,i-1+delay_ij] += self.eps
-
-            # --- Check for synchronization ---
-            if all(y[:,i-1] < 1.0e-10) and stopatsync:
-                if fullout is False:
-                    return reshape(y[:,-1],y0.shape)
-                else:
-                    return y
-
-            # --- Resolve pulses---
-            y[:,i-1] += pulses[:,i-1]
-
-            # --- Euler step
-            y[:,i] = y[:,i-1] + dt*dydt(y[:,i-1],(i-1)*dt,p)
-
-        # integration finished
-        if fullout is False:
-            # just return y(T), in same shape as y0
-            return reshape(y[:,-1],y0.shape)
-        # return solution at all nodes, all timesteps
-        return y
-'''
-
-
 
 
 class DistanceEmbedding(object):
