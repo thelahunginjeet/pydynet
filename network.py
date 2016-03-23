@@ -156,15 +156,14 @@ class PulseOscillatorNetwork(nx.Graph):
         self.add_edges_from(nx.barabasi_albert_graph(N,m).edges())
 
 
-    def connect_watts_strogatz(self,N,p):
+    def connect_watts_strogatz(self,N,k,p):
         """
-        Newman-Watts-Strogatz graph staring with a ring.  Each node is wired to
-        its nearest neighbors on the ring and then additional edges are added
-        with probability p.
+        Newman-Watts-Strogatz graph staring with a k-nearest neighbor ring.
+        Additional edges are added with probability p.
         """
         # ditto
         self.connect_empty(N)
-        self.add_edges_from(nx.newman_watts_strogatz_graph(N,2,p).edges())
+        self.add_edges_from(nx.newman_watts_strogatz_graph(N,k,p).edges())
 
 
     def set_edge_lengths(self,embedding):
