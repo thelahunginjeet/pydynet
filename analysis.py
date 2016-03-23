@@ -225,7 +225,7 @@ def complexity(spike_array,method='lz_norm'):
             # determine probability of generating a 1
             p = (sum(spike_array[i,:]) + 1.0)/(T + 2.0)
             # convert the list of spikes to a string
-            s = ''.join(spike_array[i,:])
+            s = ''.join([str(x) for x in spike_array[i,:]])
             # compute normalized LZ complexity
-            c = 1.0*lz_complexity(s)/random_lz_complexity(T,p)
+            c[i] = 1.0*lz_complexity(s)/random_lz_complexity(T,p)
     return c
