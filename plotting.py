@@ -15,10 +15,11 @@ def plot_spike_raster(spike_raster):
     '''
     Accepts an input integer array of 1's and 0's (a 1 denoting a spike fired
     in that time bin) and uses imshow, with reasonable options to produce a
-    b/w image.
+    b/w image.  Spikes are shown in black.
     '''
-    fig = pylab.figure()
-    pylab.imshow(spike_raster,interpolation='none',aspect='auto',cmap='gray',figure=fig)
+    fig = pylab.figure(1)
+    # the 1-spike_raster converts zeros (no spikes) to white
+    pylab.imshow(1-spike_raster,interpolation='none',aspect='auto',cmap='gray',figure=fig)
     fig.axes[0].set_xticks([])
     fig.axes[0].set_yticks([])
     return fig
@@ -51,7 +52,7 @@ def plot_network_ring(G,defcolor='k',ncData=None,layout='radial'):
             if ncData.hask_key(nList[i]):
                 nc[i] = ncData[nList[i]]
     # now make the plot
-    fig = pylab.figure(figsize=(8,8))
+    fig = pylab.figure(1,figsize=(8,8))
     if layout == 'radial':
         pos = nx.circular_layout(G)
     else:
