@@ -8,7 +8,7 @@ analysis.py
 Created by Kevin Brown on 2015-03-17.
 """
 from numpy import log,exp,mean,abs,log2
-from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros
+from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros,newaxis
 
 def phi_of_t(y,group=None):
     '''
@@ -76,6 +76,22 @@ def convert_to_spikes(y,sorting='lower',thresh=1.0e-06):
     else:
         s[y <= thresh] = 1
     return s
+
+
+def bin_spikes(spike_array,b=10):
+    '''
+    Accepts an input integer array of zeros and ones and bins samples along
+    the column index.  Binned samples are computed according to
+        value(bin) = max(bin).
+    '''
+    n,t = spike_array.shape
+    binned_array = zeros((n,t/b),dtype=int)
+    binstart = 0
+    while t >= binstart + b:
+        binvals = spike_array[:,binstart:binstart+b].max(axis=1)
+        binned_array[:,binstart:binstart+b] = binvals[:,newaxis]
+        binstart += b
+    return binned_array
 
 
 def isi_stats(spike_array):
