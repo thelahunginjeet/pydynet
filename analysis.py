@@ -42,6 +42,31 @@ def phi_of_t(y,group=None):
     return abs(phi)
 
 
+def codeword_dictionary(spikes):
+    '''
+    Computes a dictionary of population codewords from the input spike array.
+    Codewords are keyed on word (represented as a string) and entries indicate
+    counts.
+
+    INPUT:
+        spikes: array-like, required
+            should be an N x t array of integers (0 and 1 only)
+
+    OUTPUT:
+        codewords: dictionary
+            number of times (up to t) that each word appears
+    '''
+    codewords = {}
+    N,t = spikes.shape
+    for k in xrange(0,t):
+        word = ''.join([str(x) for x in spikes[:,k]])
+        if codewords.has_key(word):
+            codewords[key] += 1
+        else:
+            codewords[key] = 1
+    return codewords
+
+
 def convert_to_spikes(y,sorting='lower',thresh=1.0e-06):
     '''
     Accepts an input array y (N x t), representing amplitude or something
@@ -228,6 +253,7 @@ def lz_complexity(s):
             else:
                 k = 1
     return lzc
+
 
 def complexity(spike_array,method='lz_norm'):
     '''
