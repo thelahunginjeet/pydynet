@@ -48,6 +48,10 @@ class PulseOscillatorNetwork(nx.Graph):
         self.eps = 1.0/(N-1)
         self.delta = 0
         self.y_th = 1.0
+        # default distance embedding
+        self.embed = network.DistanceEmbedding(N)
+        self.embed.unitcirc_map()
+        net.set_edge_lengths(self.embed)
 
 
     def is_connected(self):
