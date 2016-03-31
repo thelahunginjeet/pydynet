@@ -315,10 +315,16 @@ def complexity(spike_array,method='lz_norm'):
     c = zeros(N)
     if method == 'lz_norm':
         for i in xrange(0,N):
-            # determine probability of generating a 1
-            p = (sum(spike_array[i,:]) + 1.0)/(T + 2.0)
-            # convert the list of spikes to a string
+            # spike string
             s = ''.join([str(x) for x in spike_array[i,:]])
+            # probability of generating a 1
+            p = (sum(spike_array[i,:]) + 1.0)/(T + 2.0)
             # compute normalized LZ complexity
             c[i] = 1.0*lz_complexity(s)/random_lz_complexity(T,p)
+    if method == 'lz':
+        for i in xrange(0,N):
+            # spike string
+            s = ''.join([str(x) for x in spike_array[i,:]])
+            # non-normalized lz complexity
+            c[i] = lz_complexity(s)
     return c
