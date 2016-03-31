@@ -16,21 +16,23 @@ See the documentation in the modules for detailed usage and function arguments.
 
 Example usage:
 
-from pydynet import network
-import numpy as np
-# ring requires only one parameter
-net = network.PulseOscillatorNetwork(10,'ring')
-# some networks require a [0,1] parameter
-net = network.PulseOscillatorNetwork(10,'ER',0.2)
-# sometimes the third parameter needs to be an integer
-net = network.PulseOscillatorNetwork(10,'BA',3)
-embed = network.DistanceEmbedding(len(net.nodes()))
-embed.unitcirc_map()
-net.set_edge_lengths(embed)
-# if you want to change default delays and eps, do so here
-#   default is delta = 0, eps = 1/(Nnodes - 1)
-net.eps = 0.1
-net.delta = 1.0
-p = np.array([1,2])
-y0 = [0.1,0.1,0.2,0.2,0.3,0.3,0.4,0.4,0.5,0.5]
-y = net.euler_integrate(p,y0,100,M=10000,fullout=False,stopatsync=False)
+>>from pydynet import network
+>>import numpy as np
+
+# create a network; different topologies need different numbers of parameters;
+#   the example ring here needs only one
+>>net = network.PulseOscillatorNetwork(10,'ring')
+# other examples:
+#     net = network.PulseOscillatorNetwork(10,'ER',0.2)
+#     net = network.PulseOscillatorNetwork(10,'BA',3)
+#     net = network.PulseOscillatorNetwork(10,'WS',3,0.2)
+
+# if you want to change default delays, eps, or nodal embedding do so here
+#   default is delta = 0, eps = 1/(Nnodes - 1), embed = unitcirc_map
+# net.eps = 0.1
+# net.delta = 1.0
+# net.embed.null_map()
+
+>>p = np.array([1,2])
+>>y0 = np.zeros(len(net))
+>>y = net.euler_integrate(p,y0,100,M=10000,fullout=False,stopatsync=False)
