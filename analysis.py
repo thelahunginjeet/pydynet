@@ -53,18 +53,32 @@ def codeword_dictionary(spikes):
             should be an N x t array of integers (0 and 1 only)
 
     OUTPUT:
+        codeseq: list
+            order of appearance of codewords; each codeword is assigned an
+            arbitrary number between 0 and N(codewords)-1
+
+        codetonum: dictionary
+            codeword to numerical mapping in codeseq
+
         codewords: dictionary
             number of times (up to t) that each word appears
     '''
+    codeseq = []
+    codetonum = {}
     codewords = {}
     N,t = spikes.shape
+    current = 0
     for k in xrange(0,t):
         word = ''.join([str(x) for x in spikes[:,k]])
         if codewords.has_key(word):
-            codewords[key] += 1
+            codewords[word] += 1
+            codeseq.append(codetonum[word])
         else:
-            codewords[key] = 1
-    return codewords
+            codewords[word] = 1
+            codetonum[word] = current
+            codeseq.append(current)
+            current += 1
+    return codewords,codetonum,codeseq
 
 
 def convert_to_spikes(y,sorting='lower',thresh=1.0e-06):
@@ -146,6 +160,43 @@ def isi_stats(spike_array):
         isi_mean[k] = isi_array[1:].mean()
         isi_var[k] = isi_array[1:].var()
     return isi_mean,isi_var
+
+
+def discrete_entropy(x,est='ML'):
+    '''
+    Computes the entropy of discrete (integer) data.
+
+    INPUT:
+        x: array-like, required
+            data for which to compute H[x]
+
+        est: string, optional
+            estimator. current options arange
+
+                'ML' : maximum-likelihood (plugin)
+                'MM' : Miller-Maddow corrected
+
+    OUTPUT:
+        H[x]: entropy of x, measured in nats
+    '''
+    # do the frequency counting
+    counts = {}
+    for xi in x:
+        if counts.has_key(xi):
+            counts[xi] += 1
+        else:
+            counts[xi] = 1
+    sumpofx = 1.0*sum(counts.values())
+    pofx = array(counts.values())/sumpofx
+    H_ML = -1*(pofx*log(pofx)).sum()
+
+    if est == 'ML':
+        H = H_ML
+
+    if est == 'MM':
+        # nonzero bins have already been removed from pofx
+        H = H_ML + (len(pofx) - 1.0)/(2.0*len(x))
+    return H
 
 
 def entropy(x,bins=10,est='ML'):
