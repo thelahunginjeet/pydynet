@@ -17,7 +17,7 @@ def plot_spike_raster(spike_raster):
     in that time bin) and uses imshow, with reasonable options to produce a
     b/w image.  Spikes are shown in black.
     '''
-    fig = pylab.figure(1)
+    fig = pylab.figure()
     # the 1-spike_raster converts zeros (no spikes) to white
     pylab.imshow(1-spike_raster,interpolation='none',aspect='auto',cmap='gray',figure=fig)
     fig.axes[0].set_xticks([])
@@ -52,7 +52,7 @@ def plot_network_ring(G,defcolor='k',ncData=None,layout='radial'):
             if ncData.hask_key(nList[i]):
                 nc[i] = ncData[nList[i]]
     # now make the plot
-    fig = pylab.figure(1,figsize=(8,8))
+    fig = pylab.figure(figsize=(8,8))
     if layout == 'radial':
         pos = nx.circular_layout(G)
     else:
