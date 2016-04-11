@@ -37,8 +37,8 @@ class PulseOscillatorNetwork(nx.Graph):
         super(PulseOscillatorNetwork,self).__init__()
         # dispatch on topology type
         tdict = {'empty':self.connect_empty, 'full':self.connect_full, 'ring':self.connect_ring, 'fixed degree':self.connect_fixed_degree,
-                 'fixed edges':self.connect_fixed_edges,'ER':self.connect_erdos_renyi, 'WS':self.connect_watts_strogatz,
-                 'BA':self.connect_barabasi_albert}
+                 'fixed edges':self.connect_fixed_edges,'ERnp':self.connect_gnp, 'WS':self.connect_watts_strogatz,
+                 'BA':self.connect_barabasi_albert,'ERnm':self.connect_gnm}
         if tdict.has_key(topology):
             tdict[topology](N,*args)
         else:
@@ -135,13 +135,21 @@ class PulseOscillatorNetwork(nx.Graph):
         self.add_edges_from(nx.gnm_random_graph(N,dN).edges())
 
 
-    def connect_erdos_renyi(self,N,p):
+    def connect_gnp(self,N,p):
         """
         Erdos-Renyi (Poisson random) graph G(N,p).
         """
         # this is kind of a dumb way to do this
         self.connect_empty(N)
         self.add_edges_from(nx.gnp_random_graph(N,p).edges())
+
+
+    def connect_gnm(self,N,m):
+        """
+        Erdos-Renyi (Poisson random) graph G(N,m).
+        """
+        self.connect_empty(N)
+        self.add_edges_from(nx.gnm_random_graph(N,m).edges())
 
 
     def connect_barabasi_albert(self,N,m):
