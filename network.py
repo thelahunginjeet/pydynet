@@ -38,7 +38,7 @@ class PulseOscillatorNetwork(nx.Graph):
         # dispatch on topology type
         tdict = {'empty':self.connect_empty, 'full':self.connect_full, 'ring':self.connect_ring, 'fixed degree':self.connect_fixed_degree,
                  'fixed edges':self.connect_fixed_edges,'ERnp':self.connect_gnp, 'WS':self.connect_watts_strogatz,
-                 'BA':self.connect_barabasi_albert,'ERnm':self.connect_gnm}
+                 'NWS':self.connect_newman_watts_strogatz,'BA':self.connect_barabasi_albert,'ERnm':self.connect_gnm}
         if tdict.has_key(topology):
             tdict[topology](N,*args)
         else:
@@ -168,14 +168,24 @@ class PulseOscillatorNetwork(nx.Graph):
         self.add_edges_from(nx.barabasi_albert_graph(N,m).edges())
 
 
-    def connect_watts_strogatz(self,N,k,p):
+    def connect_newman_watts_strogatz(self,N,k,p):
         """
-        Newman-Watts-Strogatz graph staring with a k-nearest neighbor ring.
-        Additional edges are added with probability p.
+        Newman-Watts-Strogatz graph staring with a k-nearest neighbor ring.  Additional edges are added with
+        probability p.
         """
         # ditto
         self.connect_empty(N)
         self.add_edges_from(nx.newman_watts_strogatz_graph(N,k,p).edges())
+
+
+    def connect_watts_strogatz(self,N,k,p):
+        """
+        Watts-Strogatz graph starting with a k-nearest neighbor ring.  Edges are then rewired with
+        probability p.  This differs from the NWS graph in that (1) it may not be connected and
+        (2) the mean degree will be fixed at k.
+        """
+        self.connect_empty(N)
+        self.add_edges_from(nx.watts_strogatz_graph(N,k,p).edges())
 
 
     def set_edge_lengths(self,embedding):
