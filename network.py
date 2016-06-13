@@ -258,8 +258,8 @@ class PulseOscillatorNetwork(nx.Graph):
             for n in nlist:
                 lengthAdj[i,n] = self[i][n]['length']
         # make the call to the integrator
-        y = eulerint.euler_integrate(lengthAdj,p,y0,yth,delta,eps,T,M,fo,sos)
-        return y
+        y,s = eulerint.euler_integrate(lengthAdj,p,y0,yth,delta,eps,T,M,fo,sos)
+        return y,s
 
 
 class DistanceEmbedding(object):

@@ -30,6 +30,7 @@ def euler_integrate(np.ndarray[dtype_t,ndim=2] lengthAdj, np.ndarray[dtype_t,ndi
 
     # arrays
     cdef np.ndarray[dtype_t,ndim=2] y = np.zeros((nNodes,M+1),dtype=np.float64)
+    cdef np.ndarray[int_t,ndim=2] s = np.zeros((nNodes,M+1),dtype=np.int)
     cdef np.ndarray[dtype_t,ndim=2] pulses = np.zeros((nNodes,M+1),dtype=np.float64)
     cdef np.ndarray[int_t,ndim=1] nodesToReset = np.zeros((nNodes,),dtype=np.int)
 
@@ -53,6 +54,7 @@ def euler_integrate(np.ndarray[dtype_t,ndim=2] lengthAdj, np.ndarray[dtype_t,ndi
           for n in xrange(nNodes):
               if nodesToReset[n] > 0:
                   y[n,i-1] = 0
+                  s[n,i-1] = 1
                   for nn in xrange(nNodes):
                       if lengthAdj[n,nn] > 0:
                           # here's where we use the distances
@@ -80,5 +82,5 @@ def euler_integrate(np.ndarray[dtype_t,ndim=2] lengthAdj, np.ndarray[dtype_t,ndi
 
     # out of the for loop
     if fo < 1:
-        return np.reshape(y[:,quitStep],(nNodes,1))
-    return y[:,:(quitStep+1)]
+        return np.reshape(y[:,quitStep],(nNodes,1)),np.reshape(y[:,quitStep],(nNodes,1))
+    return y[:,:(quitStep+1)],s[:,:(quitStep+1)]
