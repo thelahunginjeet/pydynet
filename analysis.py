@@ -44,7 +44,7 @@ def phi_of_t(y,group=None):
 
 def codeword_dictionary(spikes):
     '''
-    Computes a dictionary of population codewords from the input spike array.
+    Computes a dictionary of population codewords from an input spike array.
     Codewords are keyed on word (represented as a string) and entries indicate
     counts.
 
@@ -79,42 +79,6 @@ def codeword_dictionary(spikes):
             codeseq.append(current)
             current += 1
     return codewords,codetonum,codeseq
-
-
-def convert_to_spikes(y,sorting='lower',thresh=1.0e-06):
-    '''
-    Accepts an input array y (N x t), representing amplitude or something
-    similar, and returns an array of 1's and 0's of the same size giving
-    spike locations, defined as times in which the amplitude of a node
-    was above or below a user-defined threshold.
-
-    INPUT:
-        y: array-like, required
-           N x t array; time series for each of the N nodes in the model
-
-        sorting: string, optional
-            set to 'upper' to flag times where y(i,t) > thresh, and
-            'lower' to flag times where y(i,t) < thresh
-
-        thresh: float, optional
-            cutoff for flagging times; spikes can probably be identified as
-            times when y(i,t) > thresh or y(i,t) < thresh.  For example, with
-            sorting = 'upper', thresh might be 1.0 (depending on the EOM for
-            a single node).  If sorting = 'lower', thresh might be 1.0e-06
-            (if we are looking for times when the node has reset to a value
-            of zero).
-
-    OUTPUT:
-        s : array-like
-            N x t array of 1's and 0's, with 'interesting' times in y having
-            the value 1
-    '''
-    s = zeros_like(y,dtype=int)
-    if sorting is 'upper':
-        s[y >= thresh] = 1
-    else:
-        s[y <= thresh] = 1
-    return s
 
 
 def bin_spikes(spike_array,b=10):
