@@ -294,12 +294,16 @@ def complexity(spike_array,method='lz_norm'):
             c[i] = lz_complexity(s)
     return c
 
-def node_numeric_assortativity(net,attribute,jackknife=True):
+def node_assortativity(net,attribute,jackknife=True,atype='numeric'):
     '''
     Computes the assortativity coefficient and optional sampling error (via the
     jackknife) for the desired attribute over the network net.  This function is
     *only* for numerical attributes; categorical attributes will not work properly.
     In addition, this only works as expected for unweighted, undirected graphs.
+
+    This function assumes the input nodes are not already decorated with the attribute;
+    this will almost always be the case when the attribute arises as a post-simulation
+    calculation on the dynamics of the network.
 
     INPUT:
         net: PulseOscillatorNetwork (or networkx graph), required
@@ -312,6 +316,10 @@ def node_numeric_assortativity(net,attribute,jackknife=True):
         jackknife : bool, optional
             set to True to compute the expected sampling variance
 
+        atype : string, optional
+            set to 'numeric' for integer/floating point attributes and
+            'categorial' for categorical attributes
+
     OUTPUT:
         r : float
             numerical attribute assortativity coefficient (-1 < r <= 1)
@@ -319,20 +327,25 @@ def node_numeric_assortativity(net,attribute,jackknife=True):
         sigmar : float, optional
             jackknife standard deviation of r
     '''
+    # set the correct assortativity function
+    if atype is 'numeric':
+        afunc = nx.numeric_assortativity_coefficient
+    else:
+        afunc = nx.attribute_assortativity_coefficient
     # create a new graph
     G = nx.Graph()
     # add nodes from the network, with attributes
     for n in net.nodes():
         G.add_node(n,value=attribute[n])
     G.add_edges_from(net.edges())
-    r = nx.numeric_assortativity_coefficient(G,'value')
+    r = afunc(G,'value')
     if jackknife:
         sigmarsq = 0.0
         # remove one edge at a time, recompute, then add it back
         for e in G.edges():
             G.remove_edge(e[0],e[1])
-            sigmarsq += (nx.numeric_assortativity_coefficient(G,'value') - r)**2
+            sigmarsq += (afunc(G,'value') - r)**2
             G.add_edge(e[0],e[1])
         return r,sqrt(sigmarsq/len(G.edges()))
     else:
-        return r
+        return r    
