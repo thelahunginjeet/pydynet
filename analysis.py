@@ -297,9 +297,8 @@ def complexity(spike_array,method='lz_norm'):
 def node_assortativity(net,attribute,jackknife=True,atype='numeric'):
     '''
     Computes the assortativity coefficient and optional sampling error (via the
-    jackknife) for the desired attribute over the network net.  This function is
-    *only* for numerical attributes; categorical attributes will not work properly.
-    In addition, this only works as expected for unweighted, undirected graphs.
+    jackknife) for the desired attribute over the network net.  In addition, this
+    only works as expected for unweighted, undirected graphs.
 
     This function assumes the input nodes are not already decorated with the attribute;
     this will almost always be the case when the attribute arises as a post-simulation
@@ -317,7 +316,7 @@ def node_assortativity(net,attribute,jackknife=True,atype='numeric'):
             set to True to compute the expected sampling variance
 
         atype : string, optional
-            set to 'numeric' for integer/floating point attributes and
+            set to 'numeric' for integer point attributes and
             'categorial' for categorical attributes
 
     OUTPUT:
@@ -348,4 +347,4 @@ def node_assortativity(net,attribute,jackknife=True,atype='numeric'):
             G.add_edge(e[0],e[1])
         return r,sqrt(sigmarsq/len(G.edges()))
     else:
-        return r    
+        return r
