@@ -42,7 +42,7 @@ class PulseOscillatorNetwork(nx.Graph):
         if tdict.has_key(topology):
             tdict[topology](N,*args)
         else:
-            print 'ERROR.  Unrecognized graph topology. Defaulting to ring.'
+            print('ERROR.  Unrecognized graph topology. Defaulting to ring.')
             self.connect_ring(N)
         # set default amplitude/delay/threshold parameters for dynamical simulations
         self.eps = 1.0/(N-1)
