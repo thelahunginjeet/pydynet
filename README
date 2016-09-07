@@ -27,6 +27,7 @@ Example usage:
 #     net = network.PulseOscillatorNetwork(10,'BA',3)
 #     net = network.PulseOscillatorNetwork(10,'WS',3,0.2)
 #     net = network.PulseOscillatorNetwork(10,'ERnm',30)
+#     net = network.PulseOscillatorNetwork(10,'configuration',degseq)
 
 # if you want to change default delays, eps, or nodal embedding do so here
 #   default is delta = 0, eps = 1/(Nnodes - 1), embed = unitcirc_map
