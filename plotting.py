@@ -9,7 +9,33 @@ This module has wrappers for making figures that we find we often need.
 
 import pylab
 import networkx as nx
-from numpy import ceil,exp
+from numpy import ceil,exp,array
+
+def plot_spike_plot(spike_raster,ptsize=10):
+    '''
+    Accepts an input integer array of 1's and 0's (a 1 denoting a spike fired
+    in that time bin) and plots the spikes as black dots.  Adjust the size of
+    the points (in points) using ptsize.
+    '''
+    fig = pylab.figure()
+    # time and node numbers
+    N,T = spike_raster.shape
+    # linear array of nodes and times where spikes are present
+    nodes = array(range(N))
+    times = array(range(T))
+    x = []
+    y = []
+    for i in xrange(0,N):
+        spikeloc = times[spike_raster[i,:] == 1]
+        x.append(spikeloc)
+        y.append(np.repeat(nodes[i],len(spikeloc)))
+    x = np.hstack(x)
+    y = np.hstack(y)
+    pylab.scatter(x = x, y = y, s = ptsize)
+    fig.axes[0].set_xticks([])
+    fig.axes[0].set_yticks([])
+    return fig
+
 
 def plot_spike_raster(spike_raster):
     '''
