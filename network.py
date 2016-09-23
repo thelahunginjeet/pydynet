@@ -38,7 +38,8 @@ class PulseOscillatorNetwork(nx.Graph):
         # dispatch on topology type
         tdict = {'empty':self.connect_empty, 'full':self.connect_full, 'ring':self.connect_ring, 'fixed degree':self.connect_fixed_degree,
                  'fixed edges':self.connect_fixed_edges,'ERnp':self.connect_gnp, 'WS':self.connect_watts_strogatz,
-                 'NWS':self.connect_newman_watts_strogatz,'BA':self.connect_barabasi_albert,'ERnm':self.connect_gnm}
+                 'NWS':self.connect_newman_watts_strogatz,'BA':self.connect_barabasi_albert,'ERnm':self.connect_gnm,
+                 'configuration':self.connect_configuration, 'edgelist':self.connect_edgelist}
         if tdict.has_key(topology):
             tdict[topology](N,*args)
         else:
@@ -186,6 +187,27 @@ class PulseOscillatorNetwork(nx.Graph):
         """
         self.connect_empty(N)
         self.add_edges_from(nx.watts_strogatz_graph(N,k,p).edges())
+
+    def connect_configuration(self,N,degseq):
+        """
+        Uses the configuration model to wire up a pulse oscillator network with a given
+        input degree sequence. The length of degseq must equal N.  The resulting network
+        is pruned of both self loops and parallel (multi) edges.
+        """
+        assert len(degseq) == N, "ERROR. Each node needs an input degree."
+        self.connect_empty(N)
+        G = nx.configuration_model(degseq)
+        G = nx.Graph(G)
+        G.remove_edges_from(G.selfloop_edges())
+        self.add_edges_from(G.edges())
+
+
+    def connect_edgelist(self,N,edgelist):
+        """
+        Creates the network from an input edgelist.
+        """
+        self.connect_empty(N)
+        self.add_edges_from(edgelist)
 
 
     def set_edge_lengths(self,embedding):
