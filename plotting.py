@@ -53,7 +53,7 @@ def construct_ncdata(G,nodelist,defcolor='k',altcolor='r'):
     return ncData
 
 
-def construct_ecdata(G,nodelist):
+def construct_ecdata(G,nodelist,lightcolor=0.25):
     '''
     Constructs a list of edgecolors for use in plot_network_ring.  All edges
     connected to the nodes in nodelist will be given a color of 1.0 (what color
@@ -62,7 +62,7 @@ def construct_ecdata(G,nodelist):
     edges not connected to the nodes in nodelist.
     '''
     edgelist = G.edges()
-    ecData = 0.5*ones(len(edgelist))
+    ecData = lightcolor*ones(len(edgelist))
     for i in range(len(ecData)):
         e = edgelist[i]
         for n in nodelist:
@@ -86,7 +86,7 @@ def plot_network_ring(G,defcolor='k',ncData=None,ecData=None,layout='radial',cma
     ncData  : dict, optional
         custom color information to decorate nodes; should be a dictionary
         keyed on nodes, with valid color information (strings, floats etc.).
-        Nodes not in the dictionary receive the default color.  
+        Nodes not in the dictionary receive the default color.
 
     ecData : list, optional
         custom color information to decorate edges; should be a list/array
@@ -104,7 +104,7 @@ def plot_network_ring(G,defcolor='k',ncData=None,ecData=None,layout='radial',cma
             if ncData.has_key(nList[i]):
                 nc[i] = ncData[nList[i]]
     # now make the plot
-    fig = pylab.figure(figsize=(8,8))
+    fig = pylab.figure()
     if layout == 'radial':
         pos = nx.circular_layout(G)
     else:
@@ -118,5 +118,7 @@ def plot_network_ring(G,defcolor='k',ncData=None,ecData=None,layout='radial',cma
         ecData = 'k'
     # make the figure
     nx.draw_networkx(G,pos=pos,node_color=nc,node_size=ns,with_labels=False,figure=fig,cmap=cmap,edge_color=ecData,edge_cmap=edgecmap,edge_vmin=0.0,edge_vmax=1.0)
+    ax = pylab.gca()
+    ax.set_aspect('equal')
     fig.axes[0].set_axis_off()
     return fig
