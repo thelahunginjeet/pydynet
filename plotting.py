@@ -9,7 +9,7 @@ This module has wrappers for making figures that we find we often need.
 
 import pylab
 import networkx as nx
-from numpy import ceil,exp,array,where,arange,hstack
+from numpy import ceil,exp,array,where,arange,hstack,ones
 
 
 def plot_spike_raster(spike_array,figtype='image',msize='9'):
@@ -39,7 +39,39 @@ def plot_spike_raster(spike_array,figtype='image',msize='9'):
     return fig
 
 
-def plot_network_ring(G,defcolor='k',ncData=None,layout='radial'):
+def construct_ncdata(G,nodelist,defcolor='k',altcolor='r'):
+    '''
+    Constructs a dictionary of node colors (binary coloring) for use in
+    plot_network_ring.  All the nodes in nodelist will be given the alternate
+    color, otherwise they will have the default color.
+    '''
+    ncData = {}.fromkeys(G.nodes())
+    for k in ncData:
+        ncData[k] = defcolor
+    for n in nodelist:
+        ncData[n] = altcolor
+    return ncData
+
+
+def construct_ecdata(G,nodelist):
+    '''
+    Constructs a list of edgecolors for use in plot_network_ring.  All edges
+    connected to the nodes in nodelist will be given a color of 1.0 (what color
+    that is depends on the edge colormap in plot_network_ring), and the other
+    edges will have a color of 0.5.  This is most useful for "graying out"
+    edges not connected to the nodes in nodelist.
+    '''
+    edgelist = G.edges()
+    ecData = 0.5*ones(len(edgelist))
+    for i in range(len(ecData)):
+        e = edgelist[i]
+        for n in nodelist:
+            if e[0] == n or e[1] == n:
+                ecData[i] = 1.0
+    return ecData
+
+
+def plot_network_ring(G,defcolor='k',ncData=None,ecData=None,layout='radial',cmap=pylab.cm.plasma,edgecmap=pylab.cm.Greys):
     '''
     Draws an input graph G by arranging the nodes on a ring. Returns a pylab
     figure object for further manipulation or saving/display.
@@ -54,7 +86,12 @@ def plot_network_ring(G,defcolor='k',ncData=None,layout='radial'):
     ncData  : dict, optional
         custom color information to decorate nodes; should be a dictionary
         keyed on nodes, with valid color information (strings, floats etc.).
-        Only nodes which should have the nondefault color need to be present.
+        Nodes not in the dictionary receive the default color.  
+
+    ecData : list, optional
+        custom color information to decorate edges; should be a list/array
+        of color information ordered the same way as G.edges().  If set to
+        none, all edges are drawn in black.
 
     layout  : string, optional
         suggested layouts are 'circo','twopi',and 'radial'
@@ -63,8 +100,8 @@ def plot_network_ring(G,defcolor='k',ncData=None,layout='radial'):
     nList = G.nodes()
     nc = [defcolor for x in nList]
     if ncData is not None:
-        for i in xrannge(0,len(nList)):
-            if ncData.hask_key(nList[i]):
+        for i in xrange(0,len(nList)):
+            if ncData.has_key(nList[i]):
                 nc[i] = ncData[nList[i]]
     # now make the plot
     fig = pylab.figure(figsize=(8,8))
@@ -76,7 +113,10 @@ def plot_network_ring(G,defcolor='k',ncData=None,layout='radial'):
     n = len(G.nodes())
     ns = max(ceil(300*exp(-0.00856*(n - 10))),25)
     ns = int(ns/2.0)
+    # edge colors
+    if ecData is None:
+        ecData = 'k'
     # make the figure
-    nx.draw_networkx(G,pos=pos,node_color=nc,node_size=ns,with_labels=False,figure=fig)
+    nx.draw_networkx(G,pos=pos,node_color=nc,node_size=ns,with_labels=False,figure=fig,cmap=cmap,edge_color=ecData,edge_cmap=edgecmap,edge_vmin=0.0,edge_vmax=1.0)
     fig.axes[0].set_axis_off()
     return fig
