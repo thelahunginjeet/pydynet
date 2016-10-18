@@ -39,17 +39,27 @@ def plot_spike_raster(spike_array,figtype='image',msize='9'):
     return fig
 
 
-def construct_ncdata(G,nodelist,defcolor='k',altcolor='r'):
+def construct_ncdata(G,nlists,rgbcolors,defcolor=[0.,0.,0.]):
     '''
-    Constructs a dictionary of node colors (binary coloring) for use in
-    plot_network_ring.  All the nodes in nodelist will be given the alternate
-    color, otherwise they will have the default color.
+    Constructs a dictionary of node colors for use in plot_network_ring.
+    listsofnodes.  rgbcolors should be a
+    list of 3-lists, with row dimension equal to the length of args.
+    rgbcolors[i,:] will be assigned to args[i].  Any nodes not
+    specified in the list of args will receive the default color.
+
+    Example:
+
+        construct_ncdata(G,[[1,2,3],[4,5,6]],[[1.,0.,0.],[0.,1.,0.]])
+
+    Will set up node coloring so that [1,2,3] are red, [4,5,6] are blue, and
+    all other nodes are black.
     '''
     ncData = {}.fromkeys(G.nodes())
     for k in ncData:
         ncData[k] = defcolor
-    for n in nodelist:
-        ncData[n] = altcolor
+    for i in range(len(nlists)):
+        for n in nlists[i]:
+            ncData[n] = rgbcolors[i]
     return ncData
 
 
@@ -71,7 +81,7 @@ def construct_ecdata(G,nodelist,lightcolor=0.25):
     return ecData
 
 
-def plot_network_ring(G,defcolor='k',ncData=None,ecData=None,layout='radial',cmap=pylab.cm.plasma,edgecmap=pylab.cm.Greys):
+def plot_network_ring(G,nodeline=False,defcolor='k',ncData=None,ecData=None,layout='radial',cmap=pylab.cm.plasma,edgecmap=pylab.cm.Greys):
     '''
     Draws an input graph G by arranging the nodes on a ring. Returns a pylab
     figure object for further manipulation or saving/display.
@@ -79,6 +89,9 @@ def plot_network_ring(G,defcolor='k',ncData=None,ecData=None,layout='radial',cma
     INPUT
     ------
     G     : networkx graph, required
+
+    nodeline : boolean, optional
+        draw node outlines or suppress them?
 
     defcolor : string, optional
         default color for nodes
@@ -117,7 +130,12 @@ def plot_network_ring(G,defcolor='k',ncData=None,ecData=None,layout='radial',cma
     if ecData is None:
         ecData = 'k'
     # make the figure
-    nx.draw_networkx(G,pos=pos,node_color=nc,node_size=ns,with_labels=False,figure=fig,cmap=cmap,edge_color=ecData,edge_cmap=edgecmap,edge_vmin=0.0,edge_vmax=1.0)
+    if nodeline is True:
+        nx.draw_networkx(G,pos=pos,node_color=nc,node_size=ns,with_labels=False,figure=fig,cmap=cmap,edge_color=ecData,edge_cmap=edgecmap,edge_vmin=0.0,edge_vmax=1.0)
+    else:
+        nodes = nx.draw_networkx_nodes(G,pos=pos,node_color=nc,node_size=ns,with_labels=False,figure=fig,cmap=cmap)
+        nodes.set_edgecolor('none')
+        nx.draw_networkx_edges(G,pos=pos,edge_color=ecData,edge_cmap=edgecmap,edge_vmin=0.0,edge_vmax=1.0,figure=fig)
     ax = pylab.gca()
     ax.set_aspect('equal')
     fig.axes[0].set_axis_off()
