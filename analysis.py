@@ -54,15 +54,15 @@ def codeword_dictionary(spikes):
             should be an N x t array of integers (0 and 1 only)
 
     OUTPUT:
+        codewords: dictionary
+            number of times (up to t) that each word appears
+
         codeseq: list
             order of appearance of codewords; each codeword is assigned an
             arbitrary number between 0 and N(codewords)-1
 
         codetonum: dictionary
             codeword to numerical mapping in codeseq
-
-        codewords: dictionary
-            number of times (up to t) that each word appears
     '''
     codeseq = []
     codetonum = {}
