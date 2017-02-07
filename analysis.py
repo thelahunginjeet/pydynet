@@ -73,12 +73,11 @@ def codeword_dictionary(spikes):
         word = ''.join([str(x) for x in spikes[:,k]])
         if codewords.has_key(word):
             codewords[word] += 1
-            codeseq.append(codetonum[word])
         else:
             codewords[word] = 1
             codetonum[word] = current
-            codeseq.append(current)
             current += 1
+        codeseq.append(codetonum[word])
     return codewords,codetonum,codeseq
 
 
@@ -209,9 +208,31 @@ def entropy(x,bins=10,est='ML'):
     return H
 
 
+def codeword_complexity(spike_array,norm=True):
+    '''
+    Computes the Lempel-Ziv complexity for a series of codewords.  If norm is
+    True, the normalized lz_complexity is returned.
+    '''
+    N,t = spike_array.shape
+    # find and count the codewords
+    codewords,codetonum,codeseq = codeword_dictionary(spike_array)
+    # compute the non-normalized LZ complexity
+    lzc = lz_complexity(codeseq)
+    # normalize if desired
+    if norm is True:
+        f = 1.0*array(codewords.values())/t
+        # source entropy
+        h = -sum(f*np.log2(f))
+        # length term
+        bn = t/log2(t)
+        # normalize
+        lzc = lzc/(h*bn)
+    return lzc
+
+
 def random_lz_complexity(n,p=0.5):
     '''
-    Computes the expected Lev-Zimpel complexity for a random sequence of length
+    Computes the expected Lempel-Ziv complexity for a random sequence of length
     n and expected probability of generating a 1 = p.  Useful for normalizing
     the raw lz_complexity.  This function will behave poorly if p is identically
     0 or 1.  Therefore, it would be best to estimate p from real (finite length)
@@ -234,7 +255,7 @@ def random_lz_complexity(n,p=0.5):
 
 def lz_complexity(s):
     '''
-    Lev-Zimpel complexity as described in Kaspar and Schuster, Phys. Rev. A.
+    Lempel-Ziv complexity as described in Kaspar and Schuster, Phys. Rev. A.
     The input iterable (see below) does not have to be binary (2-element), but
     most applications of LZ complexity have used strings of 0s and 1s.
 
