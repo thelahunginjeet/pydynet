@@ -211,11 +211,13 @@ def entropy(x,bins=10,est='ML'):
 def codeword_complexity(spike_array,norm=True):
     '''
     Computes the Lempel-Ziv complexity for a series of codewords.  If norm is
-    True, the normalized lz_complexity is returned.
+    True, the normalized lz_complexity is returned.  Also returns the number
+    of unique codewords.
     '''
     N,t = spike_array.shape
     # find and count the codewords
     codewords,codetonum,codeseq = codeword_dictionary(spike_array)
+    nunique = len(codetonum.keys())
     # compute the non-normalized LZ complexity
     lzc = lz_complexity(codeseq)
     # normalize if desired
@@ -227,7 +229,7 @@ def codeword_complexity(spike_array,norm=True):
         bn = t/log2(t)
         # normalize
         lzc = lzc/(h*bn)
-    return lzc
+    return lzc,nunique
 
 
 def random_lz_complexity(n,p=0.5):
