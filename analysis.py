@@ -224,7 +224,7 @@ def codeword_complexity(spike_array,norm=True):
     if norm is True:
         f = 1.0*array(codewords.values())/t
         # source entropy
-        h = -sum(f*np.log2(f))
+        h = -sum(f*log2(f))
         # length term
         bn = t/log2(t)
         # normalize
@@ -316,6 +316,7 @@ def complexity(spike_array,method='lz_norm'):
             # non-normalized lz complexity
             c[i] = lz_complexity(s)
     return c
+
 
 def node_assortativity(net,attribute,jackknife=True,atype='numeric'):
     '''
