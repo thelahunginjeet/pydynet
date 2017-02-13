@@ -20,7 +20,7 @@ def plot_spikes_plus_bar(spike_array,barvals):
     imarray.  This can be used to plot the number of spikes in each row of
     the raster, or the frequency if it is a codeword plot, etc.
     '''
-    fig = pylab.figure()
+    fig = pylab.figure(figsize=(8,8))
     left,width = 0.1,0.65
     bottom,height = 0.1,0.65
     left_h = left+width+0.02
@@ -34,7 +34,8 @@ def plot_spikes_plus_bar(spike_array,barvals):
     ax2d.yaxis.set_major_formatter(nullfmt)
     ax2d.xaxis.set_major_formatter(nullfmt)
     plot2d = ax2d.imshow(1-spike_array,interpolation='none',aspect='auto',origin='low',cmap=pylab.cm.gray)
-    axbar.barh(range(len(barvals)),barvals,color='k')
+    axbar.barh(range(len(barvals)),barvals,align='center',color='k')
+    axbar.set_ylim(ax2d.get_ylim())
     for ax in fig.axes:
         ax.set_xticks([])
         ax.set_yticks([])
