@@ -8,8 +8,37 @@ This module has wrappers for making figures that we find we often need.
 """
 
 import pylab
+from matplotlib.ticker import NullFormatter
 import networkx as nx
 from numpy import ceil,exp,array,where,arange,hstack,ones
+
+def plot_spikes_plus_bar(spike_array,barvals):
+    '''
+    Plot an input spike array as an image, and adds a horizontal bar plot to the
+    right of the image with values in barvals.  If len(barvals) = imarray.shape[0],
+    the bars on the right will be in one-to-one correspondence with the rows of
+    imarray.  This can be used to plot the number of spikes in each row of
+    the raster, or the frequency if it is a codeword plot, etc.
+    '''
+    fig = pylab.figure()
+    left,width = 0.1,0.65
+    bottom,height = 0.1,0.65
+    left_h = left+width+0.02
+    rect_image = [left,bottom,width,height]
+    rect_bar = [left_h,bottom,0.15,height]
+    ax2d = pylab.axes(rect_image)
+    axbar = pylab.axes(rect_bar,frameon=False)
+    nullfmt = NullFormatter()
+    axbar.yaxis.set_major_formatter(nullfmt)
+    axbar.xaxis.set_major_formatter(nullfmt)
+    ax2d.yaxis.set_major_formatter(nullfmt)
+    ax2d.xaxis.set_major_formatter(nullfmt)
+    plot2d = ax2d.imshow(1-spike_array,interpolation='none',aspect='auto',origin='low',cmap=pylab.cm.gray)
+    axbar.barh(range(len(barvals)),barvals,color='k')
+    for ax in fig.axes:
+        ax.set_xticks([])
+        ax.set_yticks([])
+    return fig
 
 
 def plot_spike_raster(spike_array,figtype='image',msize='9'):
