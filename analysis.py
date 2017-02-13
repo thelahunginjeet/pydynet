@@ -81,6 +81,20 @@ def codeword_dictionary(spikes):
     return codewords,codetonum,codeseq
 
 
+def codeword_raster(codewords):
+    '''
+    Uses a codeword dictionary to produce a codeword raster (codewords x spikes)
+    and a numeric array of codeword frequencies.
+    '''
+    coderast = []
+    codenum = []
+    for k in codewords:
+        coderast.append([int(c) for c in k])
+        codenum.append(1.0*codewords[k]/sum(codewords.values()))
+    coderast = array(coderast)
+    codenum = array(codenum)
+    return codenum,coderast
+
 def bin_spikes(spike_array,b=10):
     '''
     Accepts an input integer array of zeros and ones and bins samples along
