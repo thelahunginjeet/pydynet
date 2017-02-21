@@ -10,7 +10,26 @@ This module has wrappers for making figures that we find we often need.
 import pylab
 from matplotlib.ticker import NullFormatter
 import networkx as nx
-from numpy import ceil,exp,array,where,arange,hstack,ones
+from numpy import ceil,exp,array,where,arange,hstack,ones,sort
+
+
+def zipf_plot(freq_data):
+    '''
+    Makes a Zipf plot (log(frequency) vs. log(rank)) for input frequency data.
+
+    Parameters
+    ------
+    freq_data : numpy array, required
+    '''
+    fig = pylab.figure(figsize=(8,8))
+    sorted_freq = sort(freq_data)[::-1]
+    ranks = range(1,len(sorted_freq)+1)
+    pylab.loglog(ranks,sorted_freq,'ko')
+    pylab.xlabel('Rank')
+    pylab.ylabel('Frequency')
+    pylab.xlim(0.5*min(ranks),1.5*max(ranks))
+    return fig
+
 
 def plot_spikes_plus_bar(spike_array,barvals):
     '''
