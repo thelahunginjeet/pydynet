@@ -51,4 +51,4 @@ Example usage:
 # integration looks like:
 >>p = np.array([1,2])
 >>y0 = np.zeros(len(net))
->>y,s = net.euler_integrate(p,y0,100,M=10000,fullout=False,stopatsync=False)
+>>y,s = net.euler_integrate(p,y0,100,M=10000)

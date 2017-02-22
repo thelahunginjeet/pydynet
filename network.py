@@ -46,8 +46,7 @@ class PulseOscillatorNetwork(nx.Graph):
             print('ERROR.  Unrecognized graph topology. Defaulting to ring.')
             self.connect_ring(N)
         # set default amplitude/delay/threshold parameters for dynamical simulations
-        # eps is the matrix of synaptic weights, which is all excitatory by default
-        self.eps = self.set_synaptic('excitatory')
+        self.set_synaptic('excitatory')
         self.delta = 0
         self.y_th = 1.0
         # default distance embedding
@@ -64,11 +63,11 @@ class PulseOscillatorNetwork(nx.Graph):
         """
         N = len(self.nodes())
         if mode is 'excitatory':
-            return (1.0/(N-1))*ones((N,N))
+            self.eps = (1.0/(N-1))*ones((N,N))
         elif mode is 'inhibitory':
-            return -(1.0/(N-1))*ones((N,N))
+            self.eps = -(1.0/(N-1))*ones((N,N))
         elif mode is 'random':
-            return (1.0/(N-1))*randspin((N,N))
+            self.eps = (1.0/(N-1))*randspin((N,N))
 
     def is_connected(self):
         """
