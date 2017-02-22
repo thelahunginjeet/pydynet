@@ -16,8 +16,8 @@ cdef inline dtype_t dydtMS(dtype_t y, dtype_t t, dtype_t p0, dtype_t p1) nogil:
 @cython.boundscheck(False)
 @cython.wraparound(False)
 def euler_integrate(np.ndarray[dtype_t,ndim=2] lengthAdj, np.ndarray[dtype_t,ndim=1] p,
-        np.ndarray[dtype_t,ndim=2] y0, dtype_t yth, dtype_t delta, dtype_t eps,
-        int_t T,int_t M, bool_t fo, bool_t sos):
+        np.ndarray[dtype_t,ndim=2] y0, dtype_t yth, dtype_t delta,
+        np.ndarray[dtype_t,ndim=2] eps, int_t T,int_t M, bool_t fo, bool_t sos):
     '''
     Cythonized integrator.
     '''
@@ -62,7 +62,7 @@ def euler_integrate(np.ndarray[dtype_t,ndim=2] lengthAdj, np.ndarray[dtype_t,ndi
                           # if a pulse is to be added after T, ignore it
                           #   (it will never fire)
                           if i-1+delay_ij < M+1:
-                              pulses[nn,i-1+delay_ij] += eps
+                              pulses[nn,i-1+delay_ij] += eps[n,nn]
 
 
           # --- Check for synchronization ---

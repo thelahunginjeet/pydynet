@@ -8,7 +8,7 @@ This module controls the construction of a network of oscillators.
 """
 
 from __future__ import division
-from utilities import randchoice
+from utilities import randchoice,randspin
 from numpy import zeros,ones,arange,empty_like,where,reshape,asarray
 from numpy import sqrt,cos,sin,pi,mod,round,all
 from numpy import mean,var
@@ -46,7 +46,8 @@ class PulseOscillatorNetwork(nx.Graph):
             print('ERROR.  Unrecognized graph topology. Defaulting to ring.')
             self.connect_ring(N)
         # set default amplitude/delay/threshold parameters for dynamical simulations
-        self.eps = 1.0/(N-1)
+        # eps is the matrix of synaptic weights, which is all excitatory by default
+        self.eps = self.set_synaptic('excitatory')
         self.delta = 0
         self.y_th = 1.0
         # default distance embedding
@@ -54,6 +55,20 @@ class PulseOscillatorNetwork(nx.Graph):
         self.embed.unitcirc_map()
         self.set_edge_lengths(self.embed)
 
+    def set_synaptic(self,mode='excitatory'):
+        """
+        Sets up the matrix of synaptic weights.  Currently supported options are:
+            'excitatory': all connections have weight +1/(N-1)
+            'inhibitory': all connections have weight -1/(N-1)
+            'random' : each connection is equally likely to be + or - 1/(N-1)
+        """
+        N = len(self.nodes())
+        if mode is 'excitatory':
+            return (1.0/(N-1))*ones((N,N))
+        elif mode is 'inhibitory':
+            return -(1.0/(N-1))*ones((N,N))
+        elif mode is 'random':
+            return (1.0/(N-1))*randspin((N,N))
 
     def is_connected(self):
         """
@@ -273,7 +288,8 @@ class PulseOscillatorNetwork(nx.Graph):
         # things to try to avoid lots of python object access
         yth = float64(self.y_th)
         delta = float64(self.delta)
-        eps = float64(self.eps)
+        eps = self.eps.astype(float64)
+        #eps = float64(self.eps)
         lengthAdj = zeros((len(self.nodes()),len(self.nodes())),dtype=float64)
         for i in xrange(len(self.nodes())):
             nlist = self.neighbors(i)

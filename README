@@ -1,8 +1,9 @@
 Author : Kevin S. Brown (kevin.s.brown@uconn.edu, github.com/thelahunginjeet), Ann M. Hermundstad
 
-A python package for construction and simulation of dynamical networks, including embedding in physical space (i.e., making
-the edge weights correspond to some kind of physical distance).  Current support is only for pulse-coupled oscillators.
-This package relies heavily on the networkx python package for graph representation and manipulation.
+A python package for construction and simulation of dynamical networks, including embedding in
+physical space (i.e., making the edge weights correspond to some kind of physical distance).
+Current support is only for pulse-coupled oscillators.  This package relies heavily on the
+networkx python package for graph representation and manipulation.
 
 All source code is made available under the BSD-3 license.
 
@@ -21,7 +22,9 @@ Example usage:
 
 # create a network; different topologies need different numbers of parameters;
 #   the example ring here needs only one
+
 >>net = network.PulseOscillatorNetwork(10,'ring')
+
 # other examples:
 #     net = network.PulseOscillatorNetwork(10,'ERnp',0.2)
 #     net = network.PulseOscillatorNetwork(10,'BA',3)
@@ -30,12 +33,22 @@ Example usage:
 #     net = network.PulseOscillatorNetwork(10,'configuration',degseq)
 #     net = network.PulseOscillatorNetwork(10,'edgelist',list_of_edges)
 
-# if you want to change default delays, eps, or nodal embedding do so here
-#   default is delta = 0, eps = 1/(Nnodes - 1), embed = unitcirc_map
-# net.eps = 0.1
-# net.delta = 1.0
-# net.embed.null_map()
+# by default, all of these networks will have synaptic weight matrices that
+#   are purely excitatory. If you want to change that, use:
 
+>>net.set_synaptic('inhibitory')
+
+# to get a matrix of random excitatory and inhibitory connections, use 'random'
+#   in the argument to set_synaptic().  You can also set the matrix to anything
+#   you want, but direct setting of self.eps could cause problems if you do not
+#   ensure it is an N x N matrix.
+
+# changing default delay or embedding can be done directly:
+
+>>net.delta = 1.0
+>>net.embed.null_map()
+
+# integration looks like:
 >>p = np.array([1,2])
 >>y0 = np.zeros(len(net))
 >>y,s = net.euler_integrate(p,y0,100,M=10000,fullout=False,stopatsync=False)
