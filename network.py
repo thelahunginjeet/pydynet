@@ -71,6 +71,7 @@ class PulseOscillatorNetwork(nx.Graph):
             for e in self.edges():
                 if rand() < p:
                     self.eps[e[0],e[1]] = -1*self.eps[e[0],e[1]]
+                    self.eps[e[1],e[0]] = self.eps[e[0],e[1]]
 
     def is_connected(self):
         """
