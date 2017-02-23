@@ -9,6 +9,7 @@ This module controls the construction of a network of oscillators.
 
 from __future__ import division
 from utilities import randchoice,randspin
+from numpy.random import rand
 from numpy import zeros,ones,arange,empty_like,where,reshape,asarray
 from numpy import sqrt,cos,sin,pi,mod,round,all
 from numpy import mean,var
@@ -54,20 +55,22 @@ class PulseOscillatorNetwork(nx.Graph):
         self.embed.unitcirc_map()
         self.set_edge_lengths(self.embed)
 
-    def set_synaptic(self,mode='excitatory'):
+    def set_synaptic(self,mode='excitatory',p=0.5):
         """
         Sets up the matrix of synaptic weights.  Currently supported options are:
             'excitatory': all connections have weight +1/(N-1)
             'inhibitory': all connections have weight -1/(N-1)
-            'random' : each connection is equally likely to be + or - 1/(N-1)
+            'random' : connections are inhibitory with probability p and excitatory
+                with probability 1-p
         """
         N = len(self.nodes())
-        if mode is 'excitatory':
-            self.eps = (1.0/(N-1))*ones((N,N))
-        elif mode is 'inhibitory':
-            self.eps = -(1.0/(N-1))*ones((N,N))
+        self.eps = (1.0/(N-1))*ones((N,N))
+        if mode is 'inhibitory':
+            self.eps = -1*self.eps
         elif mode is 'random':
-            self.eps = (1.0/(N-1))*randspin((N,N))
+            for e in self.edges():
+                if rand() < p:
+                    self.eps[e[0],e[1]] = -1*self.eps[e[0],e[1]]
 
     def is_connected(self):
         """
