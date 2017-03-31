@@ -7,7 +7,7 @@ analysis.py
 
 Created by Kevin Brown on 2015-03-17.
 """
-from numpy import log,exp,mean,abs,log2,sqrt
+from numpy import log,exp,mean,abs,log2,sqrt,dot
 from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros,newaxis
 import networkx as nx
 
@@ -386,3 +386,25 @@ def node_assortativity(net,attribute,jackknife=True,atype='numeric'):
         return r,sqrt(sigmarsq/len(G.edges()))
     else:
         return r
+
+
+def sparsity(v):
+    '''
+    Computes sparsity (Vinje and Gallant, Science 287(18) 2000) for a vector v.
+    Defined as:
+            S = (1 - <v>^2/<v^2>)(1 - 1/n)^{-1}
+    where n = len(v).
+    '''
+    n = len(v)
+    return (1.0 - (v.mean()**2)/((v**2).mean()))/(1.0 - 1.0/n)
+
+
+def inv_part_ratio(v):
+    '''
+    Computes the inverse participation ratio for vector v; v is normalized
+    before calculation.
+    '''
+    vnorm = sqrt(dot(v,v))
+    v2 = power(v/vnorm,2)
+    v4 = power(v/vnorm,4)
+    return power(v2.sum(),2)/v4.sum()
