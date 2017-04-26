@@ -7,8 +7,8 @@ analysis.py
 
 Created by Kevin Brown on 2015-03-17.
 """
-from numpy import log,exp,mean,abs,log2,sqrt,dot,power
-from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros,newaxis
+from numpy import log,exp,mean,abs,log2,sqrt,dot,power,log10,logspace
+from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros,newaxis,array_split
 import networkx as nx
 
 def phi_of_t(y,group=None):
@@ -408,3 +408,37 @@ def inv_part_ratio(v):
     v2 = power(v/vnorm,2)
     v4 = power(v/vnorm,4)
     return power(v2.sum(),2)/v4.sum()
+
+def fano_factor_tc(s):
+    '''
+    Computes the Fano factor for an input spike train s as a function of the
+    block length.  The block lengths and Fano factor for those block lengths
+    are both returned.  The Fano factor for block length T is defined as:
+
+                    F(T) = var(N_i(T))/<N_i(T)>
+    '''
+    # this is the number of pieces to cut
+    nchunks = (len(s)/logspace(0.0,log10(1.0*len(s)/10),num=20)).astype(int)
+    fano = zeros(len(nchunks))
+    for i in range(len(nchunks)):
+        Ni = array([sum(x) for x in array_split(s,nchunks[i])])
+        fano[i] = Ni.var()/Ni.mean()
+    return 1.0*len(s)/nchunks,fano
+
+
+def allan_factor_tc(s):
+    '''
+    Computes the Allan factor for an input spike train s as a function of the
+    block length.  The block lengths and Allan factor for those block lengths
+    are both returned.  The Allan factor for block length T is defined as:
+
+                    A(T) = <(N_(i+1)(T) - N_i(T))^2>/2<N_i(T)>
+                         = 2F(T) - F(2T)
+    '''
+    nchunks = (len(s)/logspace(0.0,log10(1.0*len(s)/10),num=20)).astype(int)
+    allan = zeros(len(nchunks))
+    for i in range(len(nchunks)):
+        Ni = array([sum(x) for x in array_split(s,nchunks[i])])
+        anum = array([(Ni[j+1]-Ni[j])**2 for j in range(0,len(Ni)-1)])
+        allan[i] = anum.mean()/2*Ni.mean()
+    return 1.0*len(s)/nchunks,allan
