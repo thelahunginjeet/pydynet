@@ -7,7 +7,7 @@ analysis.py
 
 Created by Kevin Brown on 2015-03-17.
 """
-from numpy import log,exp,mean,abs,log2,sqrt,dot,power,log10,logspace
+from numpy import log,exp,mean,abs,log2,sqrt,dot,power,log10,logspace,median
 from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros,newaxis,array_split
 import networkx as nx
 
@@ -330,6 +330,49 @@ def complexity(spike_array,method='lz_norm'):
             # non-normalized lz complexity
             c[i] = lz_complexity(s)
     return c
+
+
+def rolling_complexity(s,block_length=2000,block_shift=1000):
+    '''
+    Computes rolling complexity (and IPR) for a spike raster s.  Calculations
+    are performed using overlapping blocks of size block_length that shift
+    in steps of block_shift.
+
+    INPUT:
+        s: integer array, required
+            binary array of nodes x times
+
+        block_length : integer, optional
+            block size for LZC calculation
+
+        block_shift : integer, optional
+            number of steps to advance the blocks
+
+    OUTPUT:
+        t : array
+            array of times at the end of blocks
+
+        nlzc : array
+            nLZC for each block
+
+        ipr : array
+            Inverse Participation Ratio for each block
+    '''
+    nlzc = []
+    ipr = []
+    t = []
+    t_start = block_length
+    next_start = 0
+    while True:
+        x = s[:,next_start:next_start + block_length]
+        lzc = complexity(x)
+        nlzc.append(median(lzc))
+        ipr.append(inv_part_ratio(lzc))
+        t.append(next_start+block_length)
+        next_start += block_shift
+        if next_start + block_length > s.shape[1]:
+            break
+    return array(t),array(nlzc),array(ipr)
 
 
 def node_assortativity(net,attribute,jackknife=True,atype='numeric'):
