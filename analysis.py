@@ -9,6 +9,7 @@ Created by Kevin Brown on 2015-03-17.
 """
 from numpy import log,exp,mean,abs,log2,sqrt,dot,power,log10,logspace,median
 from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros,newaxis,array_split
+from numpy import append,insert
 import networkx as nx
 
 def phi_of_t(y,group=None):
@@ -485,3 +486,19 @@ def allan_factor_tc(s):
         anum = array([(Ni[j+1]-Ni[j])**2 for j in range(0,len(Ni)-1)])
         allan[i] = anum.mean()/2*Ni.mean()
     return 1.0*len(s)/nchunks,allan
+
+
+def k_teager(x,k):
+    '''
+    Computes the k-Teager energy operator for input vector x.  The k-Teager
+    energy is defined as:
+
+            E[n] = max(x[n]**2 - x[n-k]*x[n+k],0)
+    '''
+    # pad at the beginning and end of the array
+    x = append(x,[x[-1]]*k)
+    x = insert(x,0,[x[0]]*k)
+    # compute
+    E = x**2 - roll(x,k)*roll(x,-k)
+    E[E < 0] = 0.0
+    return E
