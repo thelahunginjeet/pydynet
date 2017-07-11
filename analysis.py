@@ -318,7 +318,7 @@ def spike_array_shift(spike_array,chunk_size=2000):
     '''
     N,t = spike_array.shape
     spike_chunks = []
-    for node in N:
+    for node in range(N):
         for i in range(t-1,-1,-1):
             if spike_array[node,i] == 1:
                 chunk = spike_array[node,i-chunk_size+1:i-1]
