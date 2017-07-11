@@ -9,7 +9,7 @@ Created by Kevin Brown on 2015-03-17.
 """
 from numpy import log,exp,mean,abs,log2,sqrt,dot,power,log10,logspace,median
 from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros,newaxis,array_split
-from numpy import append,insert
+from numpy import append,insert,vstack
 import networkx as nx
 
 def phi_of_t(y,group=None):
@@ -95,6 +95,7 @@ def codeword_raster(codewords):
     coderast = array(coderast)
     codenum = array(codenum)
     return codenum,coderast
+
 
 def bin_spikes(spike_array,b=10):
     '''
@@ -307,6 +308,23 @@ def lz_complexity(s):
             else:
                 k = 1
     return lzc
+
+
+def spike_array_shift(spike_array,chunk_size=2000):
+    '''
+    Accepts an input spike array (N x t array of 1's and zeros) and returns a
+    new spike array consisting of chunks of length chunk_size, which end at the
+    time step right before the last spike in each row of spike_array.
+    '''
+    N,t = spike_array.shape
+    spike_chunks = []
+    for node in N:
+        for i in range(t-1,-1,-1):
+            if spike_array[node,i] == 1:
+                chunk = spike_array[node,i-chunk_size+1:i-1]
+                break
+        spike_chunks.append(chunk)
+    return vstack(spike_chunks)
 
 
 def complexity(spike_array,method='lz_norm'):
