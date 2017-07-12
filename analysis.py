@@ -310,7 +310,33 @@ def lz_complexity(s):
     return lzc
 
 
-def spike_array_shift(spike_array,chunk_size=2000):
+def shift_spike_array(spike_array):
+    '''
+    Accepts an input spike array (N x t array of 1's and 0's) and returns a new
+    array aligned at the *final* spike in each row, with the sizes of each row
+    adjusted accordingly.
+    '''
+    n,t = spike_array.shape
+    # figure out where the last spike is
+    last_spike_loc = []
+    for i in range(n):
+        for j in range(t-1,-1,-1):
+            if spike_array[i,j] == 1:
+                last_spike_loc.append(j)
+                break
+    # now find the earliest last spike, which sets the array shape
+    min_i = min(last_spike_loc)
+    # now start assembling the shifted pieces of the array
+    shifted_s = []
+    for i in range(n):
+        size_diff = abs(last_spike_loc[i]-min_i)
+        chunk = s[i,size_diff:last_spike_loc[i]-1]
+        shifted_s.append(chunk)
+    return vstack(shifted_s)
+
+
+
+def chunk_spike_array(spike_array,chunk_size=2000):
     '''
     Accepts an input spike array (N x t array of 1's and zeros) and returns a
     new spike array consisting of chunks of length chunk_size, which end at the
