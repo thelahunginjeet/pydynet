@@ -330,7 +330,7 @@ def shift_spike_array(spike_array):
     shifted_s = []
     for i in range(n):
         size_diff = abs(last_spike_loc[i]-min_i)
-        chunk = s[i,size_diff:last_spike_loc[i]-1]
+        chunk = spike_array[i,size_diff:last_spike_loc[i]-1]
         shifted_s.append(chunk)
     return vstack(shifted_s)
 
