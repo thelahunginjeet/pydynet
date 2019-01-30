@@ -61,20 +61,26 @@ def plot_spikes_plus_bar(spike_array,barvals):
     return fig
 
 
-def plot_spike_raster(spike_array,figtype='image',msize='9'):
+def plot_spike_raster(spike_array,figtype='image',msize='9',aspect='auto'):
     '''
     Accepts an input integer array of 1's and 0's (a 1 denoting a spike fired
     in that time bin) and uses either:
         (1) figtype:'image' : imshow, with reasonable options to produce a b/w image.
-            Spikes are shown in black.
+            Spikes are shown in black.  Usually more time points than nodes, so changing
+            the aspect ratio to < 1 is often helpful
         (2) figtype:'dots' : plot, in which each spike is represented as a '.'  size
             of the dot is controlled via msize.
+        (3) figtype:'events' : matplotlib eventplot, which gives greater control over
+            the appearance of the plot
     '''
     fig = pylab.figure()
     if figtype is 'image':
         # the 1-spike_raster converts zeros (no spikes) to white
-        pylab.imshow(1-spike_array,interpolation='none',aspect='auto',cmap='gray',figure=fig)
-    else:
+        N,t = spike_array.shape
+        if aspect is not 'auto':
+            aspect = aspect*(1.0*N/t)
+        pylab.imshow(1-spike_array,interpolation='none',aspect=aspect,cmap='gray',figure=fig)
+    elif figtype is 'dots':
         # spikes are present where there is a '1' in the spike_array
         N = spike_array.shape[0]
         t = arange(spike_array.shape[1])
@@ -83,6 +89,13 @@ def plot_spike_raster(spike_array,figtype='image',msize='9'):
             pylab.plot(t[spikeloc],i*spike_array[i,spikeloc],'k.',markersize=msize)
             pylab.xlim([-1,len(t)+1])
             pylab.ylim([-0.5,N-0.5])
+    else:
+        N = spike_array.shape[0]
+        t = arange(spike_array.shape[1])
+        for i in range(N):
+            event_times = spike_array[i,:]*t
+            event_times = event_times[event_times > 0]
+            pylab.eventplot(event_times,colors='k',lineoffsets=i,linelengths=0.75)
     fig.axes[0].set_xticks([])
     fig.axes[0].set_yticks([])
     return fig
