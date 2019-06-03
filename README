@@ -1,5 +1,5 @@
 Authors : Kevin S. Brown (kevin.brown@oregonstate.edu, github.com/thelahunginjeet),
-  Ann M. Hermundstad (Janelia Research Campus), Kyra Kadhim, github.com/kyralianaka
+  Ann M. Hermundstad (Janelia Research Campus), Kyra Kadhim, (github.com/kyralianaka)
 
 A python package for construction and simulation of dynamical networks, including embedding in
 physical space (i.e., making the edge weights correspond to some kind of physical distance).
