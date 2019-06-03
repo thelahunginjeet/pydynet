@@ -10,7 +10,23 @@ Created by Kevin Brown on 2015-03-17.
 from numpy import log,exp,mean,abs,log2,sqrt,dot,power,log10,logspace,median
 from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros,newaxis,array_split
 from numpy import append,insert,vstack
+from numpy.random import rand
 import networkx as nx
+
+def bin_seq(N,p,ret_string=False):
+    '''
+    Generates a binomial random sequence (1s and 0s) of length N with p(1) = p.
+    If ret_string = True, then a string (rather than an integer array) is
+    returned.
+    '''
+    x = zeros(N,dtype=int)
+    for i in range(N):
+        if rand() < p:
+            x[i] = 1
+    if ret_string:
+        return ''.join([str(c) for c in x])
+    return x
+    
 
 def phi_of_t(y,group=None):
     '''
