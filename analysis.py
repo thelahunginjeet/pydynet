@@ -26,7 +26,7 @@ def bin_seq(N,p,ret_string=False):
     if ret_string:
         return ''.join([str(c) for c in x])
     return x
-    
+
 
 def phi_of_t(y,group=None):
     '''
@@ -562,3 +562,26 @@ def k_teager(x,k):
     E = x**2 - roll(x,k)*roll(x,-k)
     E[E < 0] = 0.0
     return E
+
+
+def repeat_length(s):
+    '''
+    Uses the non-normalized LZC to try to find "complex" repeating patterns in
+    binary random sequences.  Uses bisection on the LZC as a function of sequence
+    length.  NOTE: Returned repeat length is not generally the actual length of
+    the n-mer, as LZC does not immediately plateau one character after the
+    sequence repeats, but it will be close and is certainly order of magnitude
+    correct.
+    '''
+    if sum(s) == 0 or sum(s) == len(s):
+        return 1
+    a = 2
+    b = len(s)
+    while((b-a)>1):
+        if lz_complexity(s[:b])>lz_complexity(s[:a]):
+            new = int(a+(b-a)/2)
+            if lz_complexity(s[:new]) == lz_complexity(s[:b]):
+                b = new
+            else:
+                a = new
+    return a
