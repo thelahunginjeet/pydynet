@@ -26,7 +26,7 @@ class PyTest(Command):
         raise SystemExit(errno)
 
 setup(name='pydynet',
-      version='1.6.1',
+      version='1.7.0',
       description='Python Package for Dynamics on Networks',
       author='Kevin Brown and Ann Hermundstad',
       author_email='kevin.s.brown@uconn.edu',
