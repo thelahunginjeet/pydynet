@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-
+import setuptools
 from distutils.core import setup,Command
 from numpy.distutils.misc_util import get_numpy_include_dirs
 from distutils.extension import Extension
+from Cython.Build import cythonize
 import os
 
 # you can customize
@@ -12,7 +13,7 @@ import os
 # cython extension for the euler integration
 eulerint = Extension("eulerint",
                     include_dirs = get_numpy_include_dirs(),
-                    sources = ["eulerint.c"])
+                    sources = ["eulerint.pyx"])
 
 class PyTest(Command):
     user_options = []
@@ -35,7 +36,7 @@ setup(name='pydynet',
       package_dir = {'pydynet': ''},
       package_data = {'pydynet' : ['tests/*.py']},
       ext_package = 'pydynet',
-      ext_modules = [eulerint],
+      ext_modules = cythonize([eulerint]),
       cmdclass = {'test': PyTest},
       license='BSD-3',
       classifiers=[
