@@ -576,12 +576,17 @@ def repeat_length(s):
     if sum(s) == 0 or sum(s) == len(s):
         return 1
     a = 2
+    lza = lz_complexity(s[:a])
     b = len(s)
+    lzb = lz_complexity(s[:b])
     while((b-a)>1):
-        if lz_complexity(s[:b])>lz_complexity(s[:a]):
+        if lzb > lza:
             new = int(a+(b-a)/2)
-            if lz_complexity(s[:new]) == lz_complexity(s[:b]):
+            lznew = lz_complexity(s[:new])
+            if lznew == lzb:
                 b = new
+                lzb = lznew
             else:
                 a = new
+                lza = lznew
     return a
