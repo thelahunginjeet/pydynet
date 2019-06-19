@@ -3,7 +3,8 @@ import numpy as np
 cimport numpy as np
 cimport cython
 
-from libc.math cimport round
+IF UNAME_SYSNAME != "Windows":
+    from libc.math cimport round
 
 ctypedef np.float64_t dtype_t
 ctypedef np.int_t int_t
@@ -11,6 +12,13 @@ ctypedef np.uint8_t bool_t
 
 cdef inline dtype_t dydtMS(dtype_t y, dtype_t t, dtype_t p0, dtype_t p1) nogil:
     return -p0*y + p1
+
+IF UNAME_SYSNAME == "Windows":
+    cdef inline int_t round(dtype_t v) nogil:
+        if v >= 0:
+            return <int_t>(v + 0.5)
+        else:
+            return <int_t>(v - 0.5)
 
 @cython.cdivision(True)
 @cython.boundscheck(False)
