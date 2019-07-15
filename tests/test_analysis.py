@@ -1,7 +1,8 @@
+from builtins import object
 from pydynet.analysis import *
 import numpy as np
 
-class TestAnalysis:
+class TestAnalysis(object):
 
     def setup(self):
         pass

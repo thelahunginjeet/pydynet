@@ -1,9 +1,10 @@
+from builtins import object
 from pydynet.network import PulseOscillatorNetwork
 from pydynet.network import DistanceEmbedding
 from pydynet.network import dydtMS
 import numpy as np
 
-class TestIntegration:
+class TestIntegration(object):
 
     def setup(self):
         self.net = PulseOscillatorNetwork(10,topology='ring')

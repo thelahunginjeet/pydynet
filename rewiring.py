@@ -7,11 +7,15 @@ Methods for growing/shrinking/rewiring graphs.  These functions modify the input
 
 Created by Kevin Brown on 2014-12-04.
 """
+from __future__ import absolute_import
+from __future__ import division
 
+from builtins import range
+from past.utils import old_div
 import networkx as nx
 from numpy import array,where
 from numpy.random import rand
-from utilities import randchoice
+from .utilities import randchoice
 import copy
 
 
@@ -277,12 +281,12 @@ def perturb_graph(G,p=array([0.2,0.2,0.2,0.2,0.2]),N=1000):
     # allowed operations
     graphOps = [add_random_edge,remove_random_edge,move_random_edge,swap_random_edges]
     # transform probabilities
-    p = p/p.sum()
+    p = old_div(p,p.sum())
     # keeps track of acceptance ratio
     R = 0.0
-    for i in xrange(0,N):
+    for i in range(0,N):
         # choose an operation according to p
         myop = graphOps[where(rand() < p.cumsum())[0][0]]
         # in-place mod of pertG with capture of acceptance flag
         R += myop(pertG)
-    return pertG,R/N
+    return pertG,old_div(R,N)

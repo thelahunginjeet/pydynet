@@ -7,6 +7,7 @@ This module has wrappers for making figures that we find we often need.
 
 """
 
+from builtins import range
 import pylab
 from matplotlib.ticker import NullFormatter
 import networkx as nx
@@ -23,7 +24,7 @@ def zipf_plot(freq_data):
     '''
     fig = pylab.figure(figsize=(8,8))
     sorted_freq = sort(freq_data)[::-1]
-    ranks = range(1,len(sorted_freq)+1)
+    ranks = list(range(1,len(sorted_freq)+1))
     pylab.loglog(ranks,sorted_freq,'ko')
     pylab.xlabel('Rank')
     pylab.ylabel('Frequency')
@@ -53,7 +54,7 @@ def plot_spikes_plus_bar(spike_array,barvals):
     ax2d.yaxis.set_major_formatter(nullfmt)
     ax2d.xaxis.set_major_formatter(nullfmt)
     plot2d = ax2d.imshow(1-spike_array,interpolation='none',aspect='auto',origin='low',cmap=pylab.cm.gray)
-    axbar.barh(range(len(barvals)),barvals,align='center',color='k')
+    axbar.barh(list(range(len(barvals))),barvals,align='center',color='k')
     axbar.set_ylim(ax2d.get_ylim())
     for ax in fig.axes:
         ax.set_xticks([])
@@ -175,8 +176,8 @@ def plot_network_ring(G,nodeline=False,defcolor='k',ncData=None,ecData=None,layo
     nList = G.nodes()
     nc = [defcolor for x in nList]
     if ncData is not None:
-        for i in xrange(0,len(nList)):
-            if ncData.has_key(nList[i]):
+        for i in range(0,len(nList)):
+            if nList[i] in ncData:
                 nc[i] = ncData[nList[i]]
     # now make the plot
     fig = pylab.figure()

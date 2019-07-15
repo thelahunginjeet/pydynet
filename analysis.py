@@ -7,6 +7,10 @@ analysis.py
 
 Created by Kevin Brown on 2015-03-17.
 """
+from __future__ import division
+from builtins import str
+from builtins import range
+from past.utils import old_div
 from numpy import log,exp,mean,abs,log2,sqrt,dot,power,log10,logspace,median
 from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros,newaxis,array_split
 from numpy import append,insert,vstack
@@ -51,7 +55,7 @@ def phi_of_t(y,group=None):
             index, as a function of time, computed over the input row group
     '''
     if group is None:
-        group = range(0,y.shape[0])
+        group = list(range(0,y.shape[0]))
     # set up the array exp(i*y)
     eiy = exp(1j*y)
     # do the averaging
@@ -86,9 +90,9 @@ def codeword_dictionary(spikes):
     codewords = {}
     N,t = spikes.shape
     current = 0
-    for k in xrange(0,t):
+    for k in range(0,t):
         word = ''.join([str(x) for x in spikes[:,k]])
-        if codewords.has_key(word):
+        if word in codewords:
             codewords[word] += 1
         else:
             codewords[word] = 1
@@ -120,7 +124,7 @@ def bin_spikes(spike_array,b=10):
         value(bin) = max(bin).
     '''
     n,t = spike_array.shape
-    binned_array = zeros((n,t/b),dtype=int)
+    binned_array = zeros((n,old_div(t,b)),dtype=int)
     binstart = 0
     while t >= binstart + b:
         binvals = spike_array[:,binstart:binstart+b].max(axis=1)
@@ -150,7 +154,7 @@ def isi_stats(spike_array):
     N = spike_array.shape[0]
     isi_mean = zeros(N)
     isi_var = zeros(N)
-    for k in xrange(0,N):
+    for k in range(0,N):
         spike_loc = where(spike_array[k,:] == 1)[0]
         isi_array = spike_loc - roll(spike_loc,1)
         isi_mean[k] = isi_array[1:].mean()
@@ -178,12 +182,12 @@ def discrete_entropy(x,est='ML'):
     # do the frequency counting
     counts = {}
     for xi in x:
-        if counts.has_key(xi):
+        if xi in counts:
             counts[xi] += 1
         else:
             counts[xi] = 1
     sumpofx = 1.0*sum(counts.values())
-    pofx = array(counts.values())/sumpofx
+    pofx = old_div(array(list(counts.values())),sumpofx)
     H_ML = -1*(pofx*log(pofx)).sum()
 
     if est == 'ML':
@@ -191,7 +195,7 @@ def discrete_entropy(x,est='ML'):
 
     if est == 'MM':
         # nonzero bins have already been removed from pofx
-        H = H_ML + (len(pofx) - 1.0)/(2.0*len(x))
+        H = H_ML + old_div((len(pofx) - 1.0),(2.0*len(x)))
     return H
 
 
@@ -217,7 +221,7 @@ def entropy(x,bins=10,est='ML'):
         H[x] : entropy of x, measured in nats
     '''
     cx = histogram(x,bins)[0]
-    pofx = (1.0*cx)/cx.sum()
+    pofx = old_div((1.0*cx),cx.sum())
     # remove zero bins to avoid numerical problems
     pofx = pofx[nonzero(pofx)]
     H_ML = -1*(pofx*log(pofx)).sum()
@@ -227,14 +231,14 @@ def entropy(x,bins=10,est='ML'):
 
     if est == 'MM':
         # nonzero bins have already been removed from pofx
-        H = H_ML + (len(pofx) - 1.0)/(2.0*len(x))
+        H = H_ML + old_div((len(pofx) - 1.0),(2.0*len(x)))
 
     if est == 'JK':
         Sc = 0
-        for i in xrange(0,len(x)):
+        for i in range(0,len(x)):
             newx = delete(x,i)
             Sc += entropy(newx,bins,'ML')
-        H_JK = len(x)*H_ML - ((len(x) - 1.0)/len(x))*Sc
+        H_JK = len(x)*H_ML - (old_div((len(x) - 1.0),len(x)))*Sc
         H = H_JK
 
     return H
@@ -249,18 +253,18 @@ def codeword_complexity(spike_array,norm=True):
     N,t = spike_array.shape
     # find and count the codewords
     codewords,codetonum,codeseq = codeword_dictionary(spike_array)
-    nunique = len(codetonum.keys())
+    nunique = len(list(codetonum.keys()))
     # compute the non-normalized LZ complexity
     lzc = lz_complexity(codeseq)
     # normalize if desired
     if norm is True:
-        f = 1.0*array(codewords.values())/t
+        f = 1.0*array(list(codewords.values()))/t
         # source entropy
         h = -sum(f*log2(f))
         # length term
-        bn = t/log2(t)
+        bn = old_div(t,log2(t))
         # normalize
-        lzc = lzc/(h*bn)
+        lzc = old_div(lzc,(h*bn))
     return lzc,nunique
 
 
@@ -282,7 +286,7 @@ def random_lz_complexity(n,p=0.5):
     # source entropy
     h = -p*log2(p) - (1-p)*log2(1-p)
     # expected LZ complexity of binary representations of real numbers
-    bn = n/log2(n)
+    bn = old_div(n,log2(n))
     return h*bn
 
 
@@ -377,15 +381,15 @@ def complexity(spike_array,method='lz_norm'):
     N,T = spike_array.shape
     c = zeros(N)
     if method == 'lz_norm':
-        for i in xrange(0,N):
+        for i in range(0,N):
             # spike string
             s = ''.join([str(x) for x in spike_array[i,:]])
             # probability of generating a 1
-            p = (sum(spike_array[i,:]) + 1.0)/(T + 2.0)
+            p = old_div((sum(spike_array[i,:]) + 1.0),(T + 2.0))
             # compute normalized LZ complexity
             c[i] = 1.0*lz_complexity(s)/random_lz_complexity(T,p)
     if method == 'lz':
-        for i in xrange(0,N):
+        for i in range(0,N):
             # spike string
             s = ''.join([str(x) for x in spike_array[i,:]])
             # non-normalized lz complexity
@@ -487,7 +491,7 @@ def node_assortativity(net,attribute,jackknife=True,atype='numeric'):
             G.remove_edge(e[0],e[1])
             sigmarsq += (afunc(G,'value') - r)**2
             G.add_edge(e[0],e[1])
-        return r,sqrt(sigmarsq/len(G.edges()))
+        return r,sqrt(old_div(sigmarsq,len(G.edges())))
     else:
         return r
 
@@ -500,7 +504,7 @@ def sparsity(v):
     where n = len(v).
     '''
     n = len(v)
-    return (1.0 - (v.mean()**2)/((v**2).mean()))/(1.0 - 1.0/n)
+    return old_div((1.0 - old_div((v.mean()**2),((v**2).mean()))),(1.0 - 1.0/n))
 
 
 def inv_part_ratio(v):
@@ -509,9 +513,9 @@ def inv_part_ratio(v):
     before calculation.
     '''
     vnorm = sqrt(dot(v,v))
-    v2 = power(v/vnorm,2)
-    v4 = power(v/vnorm,4)
-    return power(v2.sum(),2)/v4.sum()
+    v2 = power(old_div(v,vnorm),2)
+    v4 = power(old_div(v,vnorm),4)
+    return old_div(power(v2.sum(),2),v4.sum())
 
 def fano_factor_tc(s):
     '''
@@ -522,11 +526,11 @@ def fano_factor_tc(s):
                     F(T) = var(N_i(T))/<N_i(T)>
     '''
     # this is the number of pieces to cut
-    nchunks = (len(s)/logspace(0.0,log10(1.0*len(s)/10),num=20)).astype(int)
+    nchunks = (old_div(len(s),logspace(0.0,log10(1.0*len(s)/10),num=20))).astype(int)
     fano = zeros(len(nchunks))
     for i in range(len(nchunks)):
         Ni = array([sum(x) for x in array_split(s,nchunks[i])])
-        fano[i] = Ni.var()/Ni.mean()
+        fano[i] = old_div(Ni.var(),Ni.mean())
     return 1.0*len(s)/nchunks,fano
 
 
@@ -539,12 +543,12 @@ def allan_factor_tc(s):
                     A(T) = <(N_(i+1)(T) - N_i(T))^2>/2<N_i(T)>
                          = 2F(T) - F(2T)
     '''
-    nchunks = (len(s)/logspace(0.0,log10(1.0*len(s)/10),num=20)).astype(int)
+    nchunks = (old_div(len(s),logspace(0.0,log10(1.0*len(s)/10),num=20))).astype(int)
     allan = zeros(len(nchunks))
     for i in range(len(nchunks)):
         Ni = array([sum(x) for x in array_split(s,nchunks[i])])
         anum = array([(Ni[j+1]-Ni[j])**2 for j in range(0,len(Ni)-1)])
-        allan[i] = anum.mean()/2*Ni.mean()
+        allan[i] = old_div(anum.mean(),2*Ni.mean())
     return 1.0*len(s)/nchunks,allan
 
 
@@ -581,7 +585,7 @@ def repeat_length(s):
     lzb = lz_complexity(s[:b])
     while((b-a)>1):
         if lzb > lza:
-            new = int(a+(b-a)/2)
+            new = int(a+old_div((b-a),2))
             lznew = lz_complexity(s[:new])
             if lznew == lzb:
                 b = new

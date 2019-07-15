@@ -1,8 +1,10 @@
+from builtins import range
+from builtins import object
 from pydynet import rewiring
 from pydynet.network import PulseOscillatorNetwork
 from numpy import sort,all
 
-class TestRewiring:
+class TestRewiring(object):
 
     def setup(self):
         pass
@@ -43,7 +45,7 @@ class TestRewiring:
         edges = net.edges()
         flag = rewiring.move_random_edge_cons(net)
         if flag:
-            assert all(sort(origDegrees.values()) == sort(G.degree().values())), "MOVE CONS: Move should not have changed degree distribution!"
+            assert all(sort(list(origDegrees.values())) == sort(list(G.degree().values()))), "MOVE CONS: Move should not have changed degree distribution!"
         else:
             assert net.edges() == edges, "MOVE CONS: Edges should not have changed!"
 
@@ -62,7 +64,7 @@ class TestRewiring:
         accept = 0.0
         net = PulseOscillatorNetwork(10,0.3,'fixed degree')
         nEdges = net.number_of_edges()
-        for i in xrange(0,100):
+        for i in range(0,100):
             accept += rewiring.move_random_edge(net)
         assert net.number_of_edges() == nEdges, "MOVE DEGREE: Number of edges should not have changed!"
 
@@ -70,7 +72,7 @@ class TestRewiring:
         accept = 0.0
         net = PulseOscillatorNetwork(10,0.3,'fixed degree')
         deg = net.degree()
-        for i in xrange(0,100):
+        for i in range(0,100):
             accept += rewiring.swap_random_edges(net)
         assert accept > 0.0, "SWAP DEGREE: No swaps were performed!"
         for k in net.degree():

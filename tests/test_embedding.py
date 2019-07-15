@@ -1,7 +1,8 @@
+from builtins import object
 from pydynet.network import DistanceEmbedding
 import numpy as np
 
-class TestEmbedding:
+class TestEmbedding(object):
 
     def setup(self):
         self.embedding = DistanceEmbedding(10)

@@ -8,14 +8,18 @@ This module controls the construction of a network of oscillators.
 """
 
 from __future__ import division
-from utilities import randchoice,randspin
+from __future__ import print_function
+from __future__ import absolute_import
+from builtins import range
+from builtins import object
+from .utilities import randchoice,randspin
 from numpy.random import rand
 from numpy import zeros,ones,arange,empty_like,where,reshape,asarray
 from numpy import sqrt,cos,sin,pi,mod,round,all
 from numpy import mean,var
 from numpy import uint8,float64,int
 import networkx as nx
-import eulerint
+from . import eulerint
 
 
 def dydtMS(y,t,p):
@@ -41,7 +45,7 @@ class PulseOscillatorNetwork(nx.Graph):
                  'fixed edges':self.connect_fixed_edges,'ERnp':self.connect_gnp, 'WS':self.connect_watts_strogatz,
                  'NWS':self.connect_newman_watts_strogatz,'BA':self.connect_barabasi_albert,'ERnm':self.connect_gnm,
                  'configuration':self.connect_configuration, 'edgelist':self.connect_edgelist}
-        if tdict.has_key(topology):
+        if topology in tdict:
             tdict[topology](N,*args)
         else:
             print('ERROR.  Unrecognized graph topology. Defaulting to ring.')
@@ -91,7 +95,7 @@ class PulseOscillatorNetwork(nx.Graph):
         """
         Returns the mean and variance of the node degrees.
         """
-        return mean(self.degree().values()),var(self.degree().values())
+        return mean(list(self.degree().values())),var(list(self.degree().values()))
 
 
     def length_mean_var(self):
@@ -115,7 +119,7 @@ class PulseOscillatorNetwork(nx.Graph):
         """
         self.remove_nodes_from(self.nodes())
         # re-add desired number of nodes
-        self.add_nodes_from(range(0,N))
+        self.add_nodes_from(list(range(0,N)))
 
 
     def connect_full(self,N,p):
@@ -294,7 +298,7 @@ class PulseOscillatorNetwork(nx.Graph):
         eps = self.eps.astype(float64)
         #eps = float64(self.eps)
         lengthAdj = zeros((len(self.nodes()),len(self.nodes())),dtype=float64)
-        for i in xrange(len(self.nodes())):
+        for i in range(len(self.nodes())):
             nlist = self.neighbors(i)
             for n in nlist:
                 lengthAdj[i,n] = self[i][n]['length']
@@ -330,7 +334,7 @@ class DistanceEmbedding(object):
         """
         self.distances = ones((self.N,self.N))
         # zero out self distances
-        for i in xrange(self.N):
+        for i in range(self.N):
             self.distances[i,i] = 0.0
         return
 
@@ -343,8 +347,8 @@ class DistanceEmbedding(object):
         dtheta = 2*pi/self.N
         x = cos(arange(self.N)*dtheta)
         y = sin(arange(self.N)*dtheta)
-        for i in xrange(self.N):
-            for j in xrange(i+1,self.N):
+        for i in range(self.N):
+            for j in range(i+1,self.N):
                 self.distances[i,j] = sqrt((x[i]-x[j])**2 + (y[i]-y[j])**2)
                 self.distances[j,i] = self.distances[i,j]
         return
