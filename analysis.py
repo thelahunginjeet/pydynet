@@ -11,9 +11,10 @@ from __future__ import division
 from builtins import str
 from builtins import range
 from past.utils import old_div
-from numpy import log,exp,mean,abs,log2,sqrt,dot,power,log10,logspace,median
+from numpy import log,exp,mean,abs,log2,sqrt,dot,power,log10,logspace,median,average
 from numpy import roll,where,histogram,nonzero,delete,zeros_like,array,zeros,newaxis,array_split
-from numpy import append,insert,vstack
+from numpy import append,insert,vstack,reshape,arange,argsort,isin
+from math import floor
 from numpy.random import rand
 import networkx as nx
 
@@ -594,3 +595,82 @@ def repeat_length(s):
                 a = new
                 lza = lznew
     return a
+
+
+def shortform_raster(spike_array,sort=True,pms_first=False,ivl=None):
+    '''
+    This function will stack the M time steps of each row in a spike array
+    on intervals equal to the ISI mean of the first pacemaker node and normalize
+    by the number of intervals in the row. If the state is chaotic, input the 
+    interval desired for stacking. 
+
+    INPUT:
+        spike_array: array-like, required
+            should be an N x t array of integers (0 and 1 only)
+        
+        ivl: int, optional
+            binning interval, MUST be specified for chaotic states
+        sort: bool, optional
+            doesn't affect chaotic spike arrays but will sort the 
+            pacemakers of regular and chimera states by distance from 
+            the reference node
+        pms_first: bool, optional
+            will place the pacemakers first in the output
+    OUTPUT:
+        sfraster: array
+            should be N x ivl array of floats (0 and 1 only for regular states)
+    '''
+    N = spike_array.shape[0]
+
+    isi_mean, isi_var = isi_stats(spike_array)
+    pacemaker_indices = where(isi_var == 0)[0]
+    num_PMs = len(pacemaker_indices)
+
+    if num_PMs > 0:
+        reference_node = pacemaker_indices[0] # Use first pacemaker as reference node
+        ivl = int(round(isi_mean[reference_node]))
+    else:
+        reference_node = 0
+        if ivl == None:
+            raise ValueError("Must pass ivl for a chaotic network")
+	
+    first_spike = nonzero(spike_array[reference_node,:])[0][0]
+    start_time = int(round(first_spike - (1/4)*ivl))
+    if start_time < 0:
+        start_time = int(round(first_spike + (3/4)*ivl))
+
+    num_chunks = floor((spike_array.shape[1] - start_time) / ivl)
+
+    sfraster = zeros((N, ivl))
+    for n in range(N):
+        rs = reshape(spike_array[n,start_time:(start_time + num_chunks*ivl)], (num_chunks, ivl))
+        sfraster[n] = rs.mean(0)
+
+    if sort:
+        averages = average(sfraster, axis=1, weights=arange(1, ivl + 1)) # Weighted average across columns (one avg / node)
+
+        sort_indices = argsort(averages)
+		
+		# Shift raster vertically so that reference node is first
+        ref_node_sort_index = where(sort_indices == reference_node)[0][0]
+        sort_indices = roll(sort_indices, shift=-ref_node_sort_index)
+		
+        if pms_first:
+			# Move chaotic node indices to end (while keeping them sorted)
+            chaotic_sort_indices = where(isin(sort_indices, pacemaker_indices, invert=True))
+            chaotic_node_indices = sort_indices[chaotic_sort_indices]
+            sort_indices = delete(sort_indices, chaotic_sort_indices)
+            sort_indices = append(sort_indices, chaotic_node_indices)
+		
+        sfraster = sfraster[sort_indices,:]
+    else:
+        if pms_first:
+            node_indices = arange(N)
+            # Move chaotic node indices to end (while keeping them in order)
+            chaotic_node_indices = where(isin(node_indices, pacemaker_indices, invert=True))
+            node_indices = delete(node_indices, chaotic_node_indices)
+            node_indices = append(node_indices, chaotic_node_indices)
+
+        sfraster = sfraster[node_indices,:]
+
+    return sfraster
