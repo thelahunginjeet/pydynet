@@ -1,3 +1,4 @@
 build/
 eulerint.c
 vcvarsall.bat
+.vs
