@@ -15,8 +15,9 @@ from builtins import object
 from .utilities import randchoice,randspin
 from numpy.random import rand
 from numpy import zeros,ones,arange,empty_like,where,reshape,asarray
+from numpy import triu_indices,transpose
 from numpy import sqrt,cos,sin,pi,mod,round,all
-from numpy import mean,var
+from numpy import mean,var,random
 from numpy import uint8,float64,int
 import networkx as nx
 from . import eulerint
@@ -44,7 +45,7 @@ class PulseOscillatorNetwork(nx.Graph):
         tdict = {'empty':self.connect_empty, 'full':self.connect_full, 'ring':self.connect_ring, 'fixed degree':self.connect_fixed_degree,
                  'fixed edges':self.connect_fixed_edges,'ERnp':self.connect_gnp, 'WS':self.connect_watts_strogatz,
                  'NWS':self.connect_newman_watts_strogatz,'BA':self.connect_barabasi_albert,'ERnm':self.connect_gnm,
-                 'configuration':self.connect_configuration, 'edgelist':self.connect_edgelist}
+                 'configuration':self.connect_configuration, 'edgelist':self.connect_edgelist, 'beta dist':self.connect_degree_heterogeneity}
         if topology in tdict:
             tdict[topology](N,*args)
         else:
@@ -95,7 +96,8 @@ class PulseOscillatorNetwork(nx.Graph):
         """
         Returns the mean and variance of the node degrees.
         """
-        return mean(list(self.degree().values())),var(list(self.degree().values()))
+        degrees = [d for n,d in self.degree]
+        return mean(degrees),var(degrees)
 
 
     def length_mean_var(self):
@@ -230,6 +232,30 @@ class PulseOscillatorNetwork(nx.Graph):
         """
         self.connect_empty(N)
         self.add_edges_from(edgelist)
+
+    def connect_degree_heterogeneity(self,N,p,alpha):
+        """
+        Creates the network with a fixed edge density (p) and degree variance dependent on alpha.
+        Method used by Olhede and Wolfe, 2013 (adapted from Chung and Lu, 2002).
+        Might be faster to build an edge list... can change that in the future.
+        """
+        beta_mean = sqrt(p) 
+        beta = alpha*(1/beta_mean - 1)
+        pi_vec = random.beta(alpha,beta,size=N) #the "weight" of each node
+        #Bernoulli trials to get the edges (undirected, no self-edges)
+        adj_mat = zeros((N,N))
+        for i in range(N):
+            for j in range(i):
+                pij = pi_vec[i]*pi_vec[j]
+                adj_mat[i,j] = random.binomial(1,pij)
+        #mirror adj_mat over diagonal
+        idxs = triu_indices(N,k=1)
+        adj_mat[idxs] = transpose(adj_mat)[idxs]
+        #make the graph
+        G = nx.convert_matrix.from_numpy_array(adj_mat)
+        #use it to get the pydynet graph instance
+        self.connect_empty(N)
+        self.add_edges_from(G.edges())
 
 
     def set_edge_lengths(self,embedding):
